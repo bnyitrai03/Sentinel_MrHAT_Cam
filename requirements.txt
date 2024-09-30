@@ -1,0 +1,8 @@
+PyYAML==6.0
+pillow
+gpiozero
+numpy
+paho-mqtt
+python-dateutil
+pytz
+pybase64

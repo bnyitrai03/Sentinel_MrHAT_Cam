@@ -1,0 +1,116 @@
+@startuml classes
+set namespaceSeparator none
+
+App *-- Camera : camera
+App *-- Config : config
+App -- Logger : logger
+App *-- MQTT : mqtt
+App *-- Schedule : schedule
+App *-- Transmit : transmit
+
+Logger -- MQTT : logging through mqtt
+
+RTC <.. Schedule : getting time
+RTC <.. Transmit : getting time
+
+System <.. App : setting wake up alarm
+System <.. Schedule : setting wake up alarm
+System <.. Transmit : gathering hardware information
+
+Transmit -- Camera : camera
+Transmit -- Logger : logger
+Transmit -- MQTT : mqtt
+Transmit -- Schedule : schedule
+
+class "sentinel_mrhat_cam.App" as App {
+  acknowledge_config() -> 
+  check_config_received_event(config_received: bool) -> 
+  run() -> 
+  run_always() -> 
+  run_periodically() -> 
+  start() -> 
+  update_values() -> 
+}
+class "sentinel_mrhat_cam.Config" as Config {
+  data : dict
+  path : str
+  get_default_config() -> dict[str, Any]
+  load() -> 
+  validate_config(new_config) -> 
+  validate_period(period) -> 
+  validate_time_format(new_config) -> 
+}
+class "sentinel_mrhat_cam.Camera" as Camera {
+  cam : Picamera2
+  height : int
+  quality : int
+  width : int
+  capture() -> Optional[np.ndarray]
+  start() -> 
+}
+class "sentinel_mrhat_cam.Logger" as Logger {
+  filepath : str
+  log_queue : Queue[str]
+  pool : ThreadPool
+  start_event : threading.Event()
+  create_mqtt_handler() -> 
+  disconnect_mqtt() -> 
+  emit(record) -> 
+  publish_loop(msg: str, topic: str) -> 
+  start_logging() -> 
+  start_mqtt_logging() -> 
+}
+class "sentinel_mrhat_cam.MQTT" as MQTT {
+  broker : str
+  broker_connect_counter : int
+  client : paho.mqtt.Client()
+  config_confirm_message : str
+  config_received_event : threading.Event()
+  port : int
+  qos : int
+  subtopic : str
+  broker_check() -> 
+  connect() -> Any
+  disconnect() -> 
+  init_receive() -> 
+  is_broker_available() -> bool
+  is_connected() -> bool
+  publish(message: str, topic: str) -> 
+  reset_config_received_event() -> 
+}
+class "sentinel_mrhat_cam.Schedule" as Schedule {
+  period : float
+  time_offset : int
+  adjust_time(timestamp: str) -> str
+  calculate_shutdown_duration(waiting_time: float) -> float
+  get_wake_time(shutdown_duration: float) -> datetime
+  should_shutdown(waiting_time: float) -> bool
+  shutdown(waiting_time: float, current_time: datetime) -> 
+  working_time_check(wake_up_timestamp: str, shut_down_timestamp: str) -> 
+}
+class "sentinel_mrhat_cam.RTC" as RTC {
+  convert_timestamp(timestamp) -> str
+  find_line(lines: str, target_string) -> str
+  get_time() -> str
+  get_timedatectl() -> List[str]
+  sync_RTC_to_system() -> 
+  sync_system_to_ntp(max_retries: int, delay) -> bool
+}
+class "sentinel_mrhat_cam.System" as System {
+  gather_hardware_info() -> Union[dict[str, Any], None]
+  get_battery_info() -> dict[str, Any]
+  get_cpu_temperature() -> float
+  reboot() -> 
+  schedule_wakeup(wake_time) -> 
+  shutdown() -> 
+}
+class "sentinel_mrhat_cam.Transmit" as Transmit {
+  connect_mqtt() -> 
+  create_base64_image(image_array: Optional[np.ndarray]) -> str
+  create_message(image_array: Optional[np.ndarray], timestamp: str) -> str
+  get_message() -> str
+  log_hardware_info(hardware_info: Dict[str, Any]) -> 
+  transmit_message() -> 
+  transmit_message_with_time_measure() -> float
+}
+@enduml

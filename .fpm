@@ -1,0 +1,17 @@
+-s python
+-t deb
+--package dist
+--force
+--log warn
+--python-bin python3
+--python-package-name-prefix python3
+--python-disable-dependency paho-mqtt
+--python-disable-dependency PyYAML
+--python-disable-dependency pytz
+--depends python3-yaml
+--depends python3-tz
+--depends libcap-dev
+--before-install script/sentinel-mrhat-cam.preinst
+--deb-systemd service/sentinel-mrhat-cam.service
+--deb-systemd-enable
+--deb-systemd-auto-start

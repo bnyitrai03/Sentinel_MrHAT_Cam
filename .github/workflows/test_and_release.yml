@@ -1,0 +1,65 @@
+name: Test and Release
+
+on:
+  push:
+    branches: main
+    tags: v*.*.*
+
+  pull_request:
+    branches: [ "main" ]
+    types:
+      - synchronize
+      - opened
+      - reopened
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build and test
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Gives the action the necessary permissions for publishing new
+      # comments in pull requests.
+      pull-requests: write
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcap-dev
+      - name: Verify changes
+        uses: EffectiveRange/python-verify-github-action@v1
+        with:
+          coverage-threshold: '0'
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: test
+
+    name: Publish and release
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Package and publish
+        uses: EffectiveRange/python-package-github-action@v2
+        with:
+          use-devcontainer: 'true'
+          container-config: 'amd64-container'
+          debian-dist-command: 'sudo apt-get install -y libcap-dev && pack_python . --all'
+          install-packaging-tools: 'false'
+          add-wheel-dist: 'false'
+      - name: Release
+        uses: EffectiveRange/version-release-github-action@v1
