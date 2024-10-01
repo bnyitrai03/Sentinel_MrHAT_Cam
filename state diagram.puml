@@ -1,0 +1,28 @@
+@startuml App state diagram
+
+[*] --> Init
+Init : this is the initial state
+Init: 
+Init: - start the camera
+Init: - decide which mode to run
+Init --> CreateMessage
+
+CreateMessage: - takes the picture
+CreateMessage: - gets the timestamp
+CreateMessage: - prepare the json for sending
+CreateMessage --> ConfigCheck
+
+
+ConfigCheck: - sending uuid, waiting for response
+ConfigCheck: - handling if there is new config
+ConfigCheck: - if it got late shut down the device
+ConfigCheck --> Transmit
+
+Transmit: transmit the message
+Transmit --> ShutDown : period > 60
+Transmit --> CreateMessage : period < 60
+
+ShutDown: in this state the Pi shuts down in between taking pictures
+ShutDown --> [*]
+
+@enduml

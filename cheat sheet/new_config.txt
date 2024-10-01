@@ -1,0 +1,4 @@
+from the json we make a list of configs and a uuid variable
+we iterate the list based on the id -> we select the config whose interval matches the current time
+
+-> check the "sleep" value at the initialization of the App instance

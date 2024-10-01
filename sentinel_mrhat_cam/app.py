@@ -55,9 +55,9 @@ class App:
         self.config = Config(config_path)
         self.camera = Camera(self.config.data)
         self.mqtt = MQTT()
-        # self.schedule = Schedule(period=self.config.data["period"])
+        self.schedule = Schedule(period=self.config.data["period"])
         self.logger = logger
-        # self.transmit = Transmit(self.camera, self.logger, self.schedule, self.mqtt)
+        self.transmit = Transmit(self.camera, self.logger, self.schedule, self.mqtt)
 
     @log_execution_time("Starting the app")
     def start(self) -> None:

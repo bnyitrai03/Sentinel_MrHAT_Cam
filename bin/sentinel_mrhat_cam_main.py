@@ -49,7 +49,7 @@ def main():
 
     try:
         app.run()
-        
+
     except SystemExit as e:
         logging.info(f"Exit code in main: {e.code}\n Exiting the application because: {e}")
         sys.exit(e.code)

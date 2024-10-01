@@ -1,7 +1,45 @@
-{
-    "quality": "3K",
-    "mode": "periodic",
-    "period": 15,
-    "wakeUpTime": "00:01:00",
-    "shutDownTime": "23:59:00"
-}
+[
+    {
+        "uuid": "8D8AC610-566D-4EF0-9C22-186B2A5ED793"
+    },
+    {
+        "id": 0,
+        "quality": "3K",
+        "sleeping": true,
+        "period": 15,
+        "startTime": "00:00:00",
+        "endTime": "07:00:00"
+    },
+    {
+        "id": 1,
+        "quality": "3K",
+        "sleeping": false,
+        "period": 30,
+        "startTime": "07:00:00",
+        "endTime": "12:00:00"
+    },
+    {
+        "id": 2,
+        "quality": "3K",
+        "sleeping": true,
+        "period": 30,
+        "startTime": "12:00:00",
+        "endTime": "15:00:00"
+    },
+    {
+        "id": 3,
+        "quality": "3K",
+        "sleeping": false,
+        "period": 30,
+        "startTime": "15:00:00",
+        "endTime": "19:00:00"
+    },
+    {
+        "id": 4,
+        "quality": "3K",
+        "sleeping": true,
+        "period": 15,
+        "startTime": "19:00:00",
+        "endTime": "23:59:59"
+    }
+]
