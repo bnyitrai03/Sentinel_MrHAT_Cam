@@ -6,7 +6,6 @@ import sys
 from os import makedirs
 from os.path import dirname, exists, isdir, join, basename
 from pathlib import Path
-
 from sentinel_mrhat_cam.app import App
 from sentinel_mrhat_cam.logger import Logger
 from sentinel_mrhat_cam.static_config import LOG_CONFIG_PATH, CONFIG_PATH, CONFIG_DIR
@@ -37,15 +36,14 @@ def main():
     """
 
     # Setting up the configuration directory and copying the default configuration files if necessary
-    _set_up_configuration()
+    # _set_up_configuration()
 
     # Configuring and starting the logging
     logger = Logger(LOG_CONFIG_PATH)
     logger.start_logging()
 
     # Instantiating the Camera and MQTT objects with the provided configuration file
-    app = App(CONFIG_PATH, logger)
-    app.start()
+    app = App()
 
     try:
         app.run()

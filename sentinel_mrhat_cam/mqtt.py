@@ -51,7 +51,7 @@ class MQTT(ICommunication):
     def disconnect(self) -> None:
         pass
 
-    def init_receive(self) -> None:
+    def init(self) -> None:
         pass
 
     def is_connected(self) -> bool:
