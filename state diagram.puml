@@ -19,10 +19,12 @@ ConfigCheck: - if neccessery shut down the device
 ConfigCheck --> Transmit
 
 Transmit: - transmit the message
+Transmit --> ConfigCheck : new config
 Transmit --> ShutDown : period > THRESHOLD
 Transmit --> CreateMessage : period < THRESHOLD
 
 ShutDown: in this state the Pi shuts down in between taking pictures
+ShutDown --> ConfigCheck : new config
 ShutDown --> [*]
 
 @enduml
