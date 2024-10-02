@@ -1,3 +1,18 @@
+from abc import ABC, abstractmethod
+from typing import Optional
+import numpy as np
+
+
+class ICamera(ABC):
+    @abstractmethod
+    def capture(self) -> Optional[np.ndarray]:
+        pass
+
+    @abstractmethod
+    def start(self) -> None:
+        pass
+
+
 class Camera(ICamera):
     def __init__(self):
         self._cam = None
@@ -11,14 +26,5 @@ class Camera(ICamera):
     def capture(self) -> Optional[np.ndarray]:
         pass
 
-    def start(self) -> None:
-        pass
-
-class ICamera(ABC):
-    @abstractmethod
-    def capture(self) -> Optional[np.ndarray]:
-        pass
-
-    @abstractmethod
     def start(self) -> None:
         pass

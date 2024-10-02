@@ -1,3 +1,6 @@
+from typing import List, Dict, Any
+
+
 class Config:
     def __init__(self):
         self._list: List = []

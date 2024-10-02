@@ -1,3 +1,8 @@
+from abc import ABC, abstractmethod
+import threading
+from typing import Any
+
+
 class ICommunication(ABC):
     @abstractmethod
     def connect(self) -> Any:

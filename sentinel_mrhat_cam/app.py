@@ -1,9 +1,9 @@
-class App:
-    def __init__(self, camera: ICamera, communication: ICommunication, rtc: IRTC, system: ISystem):
-        self._context: Context = Context()
+from .states import Context
 
-    def start(self) -> None:
-        self._context.set_state(InitState())
+
+class App:
+    def __init__(self):
+        self._context: Context = Context()
 
     def run(self) -> None:
         while True:

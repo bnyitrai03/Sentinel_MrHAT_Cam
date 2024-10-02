@@ -1,3 +1,13 @@
+from abc import ABC, abstractmethod
+from typing import List
+
+
+class IRTC(ABC):
+    @abstractmethod
+    def get_time(self) -> str:
+        pass
+
+
 class RTC(IRTC):
     def _convert_timestamp(self, timestamp) -> str:
         pass
@@ -14,10 +24,5 @@ class RTC(IRTC):
     def _sync_system_to_ntp(self, max_retries: int, delay: int) -> bool:
         pass
 
-    def get_time(self) -> str:
-        pass
-
-class IRTC(ABC):
-    @abstractmethod
     def get_time(self) -> str:
         pass
