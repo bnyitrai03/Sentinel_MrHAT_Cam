@@ -17,14 +17,16 @@ CONFIGSUBTOPIC = "config/er-edge"
 QOS = 2
 USERNAME = "er-edge"
 PASSWORD = "admin" """
+UUID_TOPIC = "uuid"
+UUID_ACK_TOPIC
 
 # Prod topics
 PORT = 1883
 QOS = 2
 BROKER = "37.220.137.22"
-IMAGETOPIC = "sentinel/cam4"
-CONFIGACKTOPIC = "cam4/confirm"
-CONFIGSUBTOPIC = "settings/cam4"
+IMAGE_TOPIC = "sentinel/cam4"
+CONFIGACK_TOPIC = "cam4/confirm"
+CONFIGSUB_TOPIC = "settings/cam4"
 USERNAME = "cam4"
 PASSWORD = "rubin2024cam4"
 LOGGING_TOPIC = "cam4/log"
