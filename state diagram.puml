@@ -2,25 +2,25 @@
 
 [*] --> Init
 Init : this is the initial state
-Init: 
 Init: - start the camera
-Init: - decide which mode to run
 Init --> CreateMessage
 
 CreateMessage: - takes the picture
 CreateMessage: - gets the timestamp
+CreateMessage: - gather hardware data
 CreateMessage: - prepare the json for sending
-CreateMessage --> ConfigCheck
+CreateMessage --> ConfigCheck : network and msg ready
 
 
 ConfigCheck: - sending uuid, waiting for response
 ConfigCheck: - handling if there is new config
-ConfigCheck: - if it got late shut down the device
+ConfigCheck: - set the new active config
+ConfigCheck: - if neccessery shut down the device
 ConfigCheck --> Transmit
 
-Transmit: transmit the message
-Transmit --> ShutDown : period > 60
-Transmit --> CreateMessage : period < 60
+Transmit: - transmit the message
+Transmit --> ShutDown : period > THRESHOLD
+Transmit --> CreateMessage : period < THRESHOLD
 
 ShutDown: in this state the Pi shuts down in between taking pictures
 ShutDown --> [*]

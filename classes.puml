@@ -40,13 +40,13 @@ class "ShutDownState" {
   + shutdown_system() -> None
 }
 
-class "sentinel_mrhat_cam.App" as App {
+class App {
   - _context: Context
   + start() -> None
   + run() -> None
 }
 
-class "sentinel_mrhat_cam.Config" as Config {
+class Config {
   + active : Dict
   + uuid: str
   - _list: List
@@ -59,12 +59,12 @@ class "sentinel_mrhat_cam.Config" as Config {
   + check_for_new_config() -> None
 }
 
-interface "sentinel_mrhat_cam.ICamera" as ICamera {
+interface ICamera {
   + start() -> None
   + capture() -> Optional[np.ndarray]
 }
 
-class "sentinel_mrhat_cam.Camera" as Camera {
+class Camera {
   - _cam : Picamera2
   - _quality : int
   - _width : int
@@ -74,20 +74,21 @@ class "sentinel_mrhat_cam.Camera" as Camera {
   - _create_base64_image(image_array: Optional[np.ndarray]) -> str
 }
 
-class "sentinel_mrhat_cam.Logger" as Logger {
+class Logger {
   - _filepath : str
   - _log_queue : Queue[str]
   - _pool : ThreadPool
   - _start_event : threading.Event()
+  - _mqtt : Any
   - _create_communication_handler() -> None
-  + disconnect_communication() -> None
+  + disconnect_remote_logging() -> None
   + emit(record) -> None
   - _publish_loop(msg: str, topic: str) -> None
   + start_logging() -> None
   + start_remote_logging() -> None
 }
 
-interface "sentinel_mrhat_cam.ICommunication" as ICommunication {
+interface ICommunication {
   + connect() -> Any
   + disconnect() -> None
   + send(message: str) -> None
@@ -95,7 +96,7 @@ interface "sentinel_mrhat_cam.ICommunication" as ICommunication {
   + init() -> None
 }
 
-class "sentinel_mrhat_cam.MQTT" as MQTT {
+class MQTT {
   - _broker : str
   - _port : int
   - _qos : int
@@ -115,7 +116,7 @@ class "sentinel_mrhat_cam.MQTT" as MQTT {
   + reset_config_received_event() -> None
 }
 
-class "sentinel_mrhat_cam.Schedule" as Schedule {
+class Schedule {
   - _time_offset : int
   + adjust_time(timestamp: str) -> str
   + calculate_shutdown_duration(waiting_time: float) -> float
@@ -125,11 +126,11 @@ class "sentinel_mrhat_cam.Schedule" as Schedule {
   + working_time_check(wake_up_timestamp: str, shut_down_timestamp: str) -> None
 }
 
-interface "sentinel_mrhat_cam.IRTC" as IRTC {
+interface IRTC {
   + get_time() -> str
 }
 
-class "sentinel_mrhat_cam.RTC" as RTC {
+class RTC {
   - _sync_RTC_to_system() -> None
   - _sync_system_to_ntp(max_retries: int, delay: int) -> bool
   + get_time() -> str
@@ -138,19 +139,19 @@ class "sentinel_mrhat_cam.RTC" as RTC {
   - _find_line(lines: str, target_string) -> str
 }
 
-interface "sentinel_mrhat_cam.ISystem" as ISystem {
+interface ISystem {
   + schedule_wakeup(wake_time: Union[str, int, float]) -> None
   + get_hardware_info() -> Optional[Dict[str, Any]]
 }
 
-class "sentinel_mrhat_cam.System" as System {
+class System {
   + schedule_wakeup(wake_time: Union[str, int, float]) -> None
   - _get_cpu_temperature() -> float
   - _get_battery_info() -> Dict[str, Any]
   + get_hardware_info() -> Optional[Dict[str, Any]]
 }
 
-class "sentinel_mrhat_cam.MessageCreator" as MessageCreator {
+class MessageCreator {
   - _system : ISystem
   - _rtc : IRTC
   - _camera : ICamera
