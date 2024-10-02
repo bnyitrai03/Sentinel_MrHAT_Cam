@@ -316,5 +316,4 @@ from .mqtt import *
 from .schedule import *
 from .app_config import *
 from .camera import *
-from .transmit import *
 from .app import *
