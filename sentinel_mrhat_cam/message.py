@@ -14,3 +14,7 @@ class MessageCreator:
 
     def log_hardware_info(self) -> None:
         pass
+
+        # image = context.camera.capture()
+        # timestamp = context.rtc.get_time()
+        # get hardware info
