@@ -3,13 +3,15 @@ from typing import Any, Dict, Optional
 import numpy as np
 import threading
 
+
 class State(ABC):
     @abstractmethod
     def handle(self, context: 'Context') -> None:
         pass
 
+
 class Context:
-    def __init__(self):
+    def __init__(self, camera: ICamera, communication: ICommunication, rtc: IRTC, system: ISystem):
         self._state: State = InitState()
         self.config: Config = Config()
         self.camera: ICamera = Camera()
@@ -26,6 +28,7 @@ class Context:
     def set_state(self, state: State) -> None:
         self._state = state
 
+
 class InitState(State):
     def handle(self, context: 'Context') -> None:
         context.config.load()
@@ -33,6 +36,7 @@ class InitState(State):
         context.communication.connect()
         context.logger.start_logging()
         context.set_state(ConfigCheckState())
+
 
 class ConfigCheckState(State):
     def handle(self, context: 'Context') -> None:
@@ -49,12 +53,14 @@ class ConfigCheckState(State):
     def send_uuid(self, context: 'Context') -> None:
         context.communication.send(f"config-ok|{context.config.uuid}")
 
+
 class CreateMessageState(State):
     def handle(self, context: 'Context') -> None:
         image = context.camera.capture()
         timestamp = context.rtc.get_time()
         message = context.message_creator.create_message(image, timestamp)
         context.set_state(TransmitState(message))
+
 
 class TransmitState(State):
     def __init__(self, message: str):
@@ -67,6 +73,7 @@ class TransmitState(State):
             context.set_state(ShutDownState(waiting_time))
         else:
             context.set_state(ConfigCheckState())
+
 
 class ShutDownState(State):
     def __init__(self, shutdown_duration: float):

@@ -1,5 +1,5 @@
 class App:
-    def __init__(self):
+    def __init__(self, camera: ICamera, communication: ICommunication, rtc: IRTC, system: ISystem):
         self._context: Context = Context()
 
     def start(self) -> None:
