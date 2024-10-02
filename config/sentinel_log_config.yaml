@@ -13,7 +13,7 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: simple
-    filename: main.log
+    filename: /home/admin/main.log
     maxBytes: 2097152 # 2 MB in bytes
     backupCount: 1
 loggers:

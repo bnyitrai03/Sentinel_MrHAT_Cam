@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
-import logging
+import time
 import shutil
-import sys
 from os import makedirs
 from os.path import dirname, exists, isdir, join, basename
 from pathlib import Path
-from sentinel_mrhat_cam.app import App
+from sentinel_mrhat_cam.states import Context
 from sentinel_mrhat_cam.logger import Logger
 from sentinel_mrhat_cam.static_config import LOG_CONFIG_PATH, CONFIG_PATH, CONFIG_DIR
 
@@ -14,21 +13,15 @@ from sentinel_mrhat_cam.static_config import LOG_CONFIG_PATH, CONFIG_PATH, CONFI
 def main():
     """
     Main entry point for the application.
-    This function initializes the logger, creates an instance of the App class,
+    This function initializes the logger, creates an instance of the Context class,
     and runs the application based on the configured mode.
-    The application can run in three modes:
-    1. "always-on": Continuously takes pictures and sends them.
-    2. "periodic": Sends images periodically based on the configured schedule.
-    3. "single-shot": Takes one picture, sends it, and then exits the script.
+    The application can run in two modes:
+    1. Sends images periodically based on the configured schedule.
+    2. The Pi shuts down in between sending the images.
     The function handles the initialization of logging, creates the App instance
     with the provided configuration, and manages the main execution loop based
     on the selected mode.
-    In case of a SystemExit exception, it logs the exit reason, disconnects
-    from MQTT, and exits the application with the provided exit code.
-    Raises
-    ------
-    SystemExit
-        If the application needs to exit due to an error or completion of its task.
+
     Notes
     -----
     This function is the entry point of the application when run as a script.
@@ -36,24 +29,16 @@ def main():
     """
 
     # Setting up the configuration directory and copying the default configuration files if necessary
-    # _set_up_configuration()
+    _set_up_configuration()
 
     # Configuring and starting the logging
-    logger = Logger(LOG_CONFIG_PATH)
+    logger = Logger()
     logger.start_logging()
 
-    # Instantiating the Camera and MQTT objects with the provided configuration file
-    app = App()
-
-    try:
-        app.run()
-
-    except SystemExit as e:
-        logging.info(f"Exit code in main: {e.code}\n Exiting the application because: {e}")
-        sys.exit(e.code)
-    finally:
-        app.mqtt.disconnect()
-        logger.disconnect_mqtt()
+    app = Context(logger)
+    while True:
+        app.request()
+        time.sleep(5)  # !!!
 
 
 def _set_up_configuration():

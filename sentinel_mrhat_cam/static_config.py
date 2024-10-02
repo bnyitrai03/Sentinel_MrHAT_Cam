@@ -2,7 +2,7 @@ import os
 import logging
 
 # Configuration file paths
-CONFIG_DIR = '/etc/sentinel-mrhat-cam'
+CONFIG_DIR = '/home/admin/config'
 LOG_CONFIG_PATH = os.path.join(CONFIG_DIR, 'sentinel_log_config.yaml')
 CONFIG_PATH = os.path.join(CONFIG_DIR, 'sentinel_app_config.json')
 TEMP_CONFIG_PATH = os.path.join(CONFIG_DIR, 'temp_config.json')
@@ -17,8 +17,7 @@ CONFIGSUBTOPIC = "config/er-edge"
 QOS = 2
 USERNAME = "er-edge"
 PASSWORD = "admin" """
-UUID_TOPIC = "uuid"
-UUID_ACK_TOPIC
+UUID_TOPIC = "cam4/uuid"
 
 # Prod topics
 PORT = 1883

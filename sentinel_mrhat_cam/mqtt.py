@@ -11,7 +11,7 @@ except ImportError:
     mqtt_client = None  # type: ignore
     mqtt_enums = None  # type: ignore
 
-from .static_config import BROKER, CONFIGSUBTOPIC, PORT, QOS, TEMP_CONFIG_PATH, CONFIG_PATH, USERNAME, PASSWORD, IMAGETOPIC
+from .static_config import BROKER, CONFIGSUB_TOPIC, PORT, QOS, TEMP_CONFIG_PATH, CONFIG_PATH, USERNAME, PASSWORD
 
 import json
 import socket
@@ -49,7 +49,7 @@ class MQTT(ICommunication):
         self._broker: str = BROKER
         self._port: int = PORT
         self._qos: int = QOS
-        self._subtopic: str = CONFIGSUBTOPIC
+        self._subtopic: str = CONFIGSUB_TOPIC
         self.broker_connect_counter: int = 0
         self.client = mqtt_client.Client(mqtt_enums.CallbackAPIVersion.VERSION2)
         self.config_confirm_message: str = "config-nok|Confirm message uninitialized"
@@ -89,7 +89,7 @@ class MQTT(ICommunication):
         SystemExit:
             Terminates the script if the broker connection fails 20 times.
         """
-        while not self.is_broker_available():
+        while not self._is_broker_available():
             logging.info("Waiting for broker to become available...")
             time.sleep(1)
             self.broker_connect_counter += 1
@@ -167,12 +167,12 @@ class MQTT(ICommunication):
             Exits the script if an error occurs during the publishing process.
         """
         try:
-            msg_info = self.client.publish(topic, message, qos=self.qos)
+            msg_info = self.client.publish(topic, message, qos=self._qos)
             msg_info.wait_for_publish(timeout=5)
         except Exception:
             exit(1)
 
-    def _init_receive(self) -> None:
+    def _init(self) -> None:
         """
         Initializes the MQTT client to receive the config file.
 
@@ -210,10 +210,13 @@ class MQTT(ICommunication):
                 self.config_received_event.set()
 
         self.client.on_message = on_message
-        self.client.subscribe(self.subtopic)
+        self.client.subscribe(self._subtopic)
 
     def _reset_config_received_event(self) -> None:
         self.config_received_event.clear()
+
+    def init(self) -> None:
+        pass
 
     def is_connected(self) -> bool:
         return self.client.is_connected() if self.client else False
