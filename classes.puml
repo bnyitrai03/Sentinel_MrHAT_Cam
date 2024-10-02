@@ -1,15 +1,47 @@
 @startuml Class diagram
 set namespaceSeparator none
 
+interface "State" {
+  + handle(context: Context) -> None
+}
+
+class "Context" {
+  - _state: State
+  + set_state(state: State) -> None
+  + request() -> None
+}
+
+class "InitState" {
+  + handle(context: Context) -> None
+  + start_camera() -> None
+}
+
+class "CreateMessageState" {
+  + handle(context: Context) -> None
+  + take_picture() -> None
+  + get_timestamp() -> None
+  + prepare_json() -> None
+}
+
+class "ConfigCheckState" {
+  + handle(context: Context) -> None
+  + send_uuid() -> None
+  + wait_for_response() -> None
+  + handle_new_config() -> None
+}
+
+class "TransmitState" {
+  + handle(context: Context) -> None
+  + transmit_message() -> None
+}
+
+class "ShutDownState" {
+  + handle(context: Context) -> None
+  + shutdown_system() -> None
+}
+
 class "sentinel_mrhat_cam.App" as App {
-  - config : Config
-  - logger : Logger
-  - camera : ICamera
-  - communication : ICommunication
-  - system : ISystem
-  - rtc : IRTC
-  - schedule : Schedule
-  - message_creator : MessageCreator
+  - _context: Context
   + start() -> None
   + run() -> None
 }
@@ -17,13 +49,14 @@ class "sentinel_mrhat_cam.App" as App {
 class "sentinel_mrhat_cam.Config" as Config {
   + active : Dict
   + uuid: str
-  - list: List
-  - path : str
+  - _list: List
+  - _path : str
   + get_default_config() -> Dict[str, Any]
   + load() -> None
   + validate_config(new_config) -> None
   + validate_period(period) -> None
   + validate_time_format(new_config) -> None
+  + check_for_new_config() -> None
 }
 
 interface "sentinel_mrhat_cam.ICamera" as ICamera {
@@ -32,24 +65,24 @@ interface "sentinel_mrhat_cam.ICamera" as ICamera {
 }
 
 class "sentinel_mrhat_cam.Camera" as Camera {
-  - cam : Picamera2
-  - quality : int
-  - width : int
-  - height : int
+  - _cam : Picamera2
+  - _quality : int
+  - _width : int
+  - _height : int
   + start() -> None
   + capture() -> Optional[np.ndarray]
-  - create_base64_image(image_array: Optional[np.ndarray]) -> str
+  - _create_base64_image(image_array: Optional[np.ndarray]) -> str
 }
 
 class "sentinel_mrhat_cam.Logger" as Logger {
-  - filepath : str
-  - log_queue : Queue[str]
-  - pool : ThreadPool
-  - start_event : threading.Event()
-  - create_communication_handler() -> None
+  - _filepath : str
+  - _log_queue : Queue[str]
+  - _pool : ThreadPool
+  - _start_event : threading.Event()
+  - _create_communication_handler() -> None
   + disconnect_communication() -> None
   + emit(record) -> None
-  - publish_loop(msg: str, topic: str) -> None
+  - _publish_loop(msg: str, topic: str) -> None
   + start_logging() -> None
   + start_remote_logging() -> None
 }
@@ -63,27 +96,27 @@ interface "sentinel_mrhat_cam.ICommunication" as ICommunication {
 }
 
 class "sentinel_mrhat_cam.MQTT" as MQTT {
-  - broker : str
-  - port : int
-  - qos : int
-  - subtopic : str
+  - _broker : str
+  - _port : int
+  - _qos : int
+  - _subtopic : str
   + client : paho.mqtt.Client
   + config_confirm_message : str
   + config_received_event : Event
   - broker_connect_counter : int
   + connect() -> Any
   + disconnect() -> None
-  - publish(message: str, topic: str) -> None
+  - _publish(message: str, topic: str) -> None
   + send(message: str) -> None
   + is_connected() -> bool
-  - broker_check() -> None
+  - _broker_check() -> None
   + init_receive() -> None
-  - is_broker_available() -> bool
+  - _is_broker_available() -> bool
   + reset_config_received_event() -> None
 }
 
 class "sentinel_mrhat_cam.Schedule" as Schedule {
-  - time_offset : int
+  - _time_offset : int
   + adjust_time(timestamp: str) -> str
   + calculate_shutdown_duration(waiting_time: float) -> float
   + get_wake_time(shutdown_duration: float) -> datetime
@@ -97,12 +130,12 @@ interface "sentinel_mrhat_cam.IRTC" as IRTC {
 }
 
 class "sentinel_mrhat_cam.RTC" as RTC {
-  - sync_RTC_to_system() -> None
-  - sync_system_to_ntp(max_retries: int, delay: int) -> bool
+  - _sync_RTC_to_system() -> None
+  - _sync_system_to_ntp(max_retries: int, delay: int) -> bool
   + get_time() -> str
-  - convert_timestamp(timestamp) -> str
-  - get_timedatectl() -> List[str]
-  - find_line(lines: str, target_string) -> str
+  - _convert_timestamp(timestamp) -> str
+  - _get_timedatectl() -> List[str]
+  - _find_line(lines: str, target_string) -> str
 }
 
 interface "sentinel_mrhat_cam.ISystem" as ISystem {
@@ -112,18 +145,27 @@ interface "sentinel_mrhat_cam.ISystem" as ISystem {
 
 class "sentinel_mrhat_cam.System" as System {
   + schedule_wakeup(wake_time: Union[str, int, float]) -> None
-  - get_cpu_temperature() -> float
-  - get_battery_info() -> Dict[str, Any]
+  - _get_cpu_temperature() -> float
+  - _get_battery_info() -> Dict[str, Any]
   + get_hardware_info() -> Optional[Dict[str, Any]]
 }
 
 class "sentinel_mrhat_cam.MessageCreator" as MessageCreator {
-  - system : ISystem
-  - rtc : IRTC
-  - camera : ICamera
+  - _system : ISystem
+  - _rtc : IRTC
+  - _camera : ICamera
   + create_message() -> str
   + log_hardware_info() -> None
 }
+
+State <|.. InitState
+State <|.. CreateMessageState
+State <|.. ConfigCheckState
+State <|.. TransmitState
+State <|.. ShutDownState
+
+Context o-- State
+App *-- Context
 
 App *-- Config
 App -- Logger
