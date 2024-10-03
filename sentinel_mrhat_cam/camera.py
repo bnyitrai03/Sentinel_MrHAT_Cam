@@ -74,5 +74,5 @@ class Camera(ICamera):
             image = self._cam.capture_array()
         except Exception as e:
             logging.error(f"Error during image capture: {e}")
-            exit(1)
+            return None
         return image
