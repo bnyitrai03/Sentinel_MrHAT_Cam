@@ -33,40 +33,9 @@ dummy_config = {
 
 class Context:
     def __init__(self, logger: Logger):
-        config = {
-            "uuid": "8D8AC610-566D-4EF0-9C22-186B2A5ED793",
-            "quality": "3K",
-            "timing": [
-                {
-                    "period": -1,
-                    "start": "00:00:00",
-                    "end": "07:00:00"
-                },
-                {
-                    "period": 30,
-                    "start": "07:00:00",
-                    "end": "12:00:00"
-                },
-                {
-                    "period": -1,
-                    "start": "12:00:00",
-                    "end": "15:00:00"
-                },
-                {
-                    "period": 30,
-                    "start": "15:00:00",
-                    "end": "19:00:00"
-                },
-                {
-                    "period": -1,
-                    "start": "19:00:00",
-                    "end": "23:59:59"
-                }
-            ]
-        }
         self._state: State = InitState()
-        self.config: Config = Config(config)
-        self.camera: ICamera = Camera()
+        self.config: Config = Config()
+        self.camera: ICamera = Camera(dummy_config)
         self.communication: ICommunication = MQTT()
         self.rtc: IRTC = RTC()
         self.system: ISystem = System()

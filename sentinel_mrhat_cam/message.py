@@ -5,8 +5,6 @@ import numpy as np
 from PIL import Image
 import io
 import base64
-from .system import System
-from .rtc import RTC
 import logging
 from typing import Dict, Any
 import json
@@ -53,6 +51,8 @@ class MessageCreator:
         """
         # Get picture from camera
         image_array = self._camera.capture()
+        if image_array is None:
+            return "Error: Camera was unable to capture the image."
 
         image: Image.Image = Image.fromarray(image_array)
         image_bytes: io.BytesIO = io.BytesIO()
@@ -75,6 +75,10 @@ class MessageCreator:
         log_entry = ", ".join(f"{k}={v}" for k, v in hardware_info.items())
         with open("hardware_log.txt", "a") as log_file:
             log_file.write(f"{log_entry}\n")
+
+        logging.info(f"battery_temperature: {hardware_info['battery_temperature']}")
+        logging.info(f"battery_percentage: {hardware_info['battery_percentage']}")
+        logging.info(f"cpu_temperature: {hardware_info['cpu_temperature']}")
 
         logging.info(f"battery_voltage_now: {hardware_info['battery_voltage_now']}")
         logging.info(f"battery_voltage_avg: {hardware_info['battery_voltage_avg']}")
