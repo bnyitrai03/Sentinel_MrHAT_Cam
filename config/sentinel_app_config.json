@@ -1,45 +1,30 @@
-[
-    {
-        "uuid": "8D8AC610-566D-4EF0-9C22-186B2A5ED793"
-    },
-    {
-        "id": 0,
-        "quality": "3K",
-        "sleeping": true,
-        "period": 15,
-        "startTime": "00:00:00",
-        "endTime": "07:00:00"
-    },
-    {
-        "id": 1,
-        "quality": "3K",
-        "sleeping": false,
+{
+    "uuid": "8D8AC610-566D-4EF0-9C22-186B2A5ED793",
+    "quality": "3K",
+    "timing": [
+      {
+        "period": -1,
+        "start": "00:00:00",
+        "end": "07:00:00"
+      },
+      {
         "period": 30,
-        "startTime": "07:00:00",
-        "endTime": "12:00:00"
-    },
-    {
-        "id": 2,
-        "quality": "3K",
-        "sleeping": true,
+        "start": "07:00:00",
+        "end": "12:00:00"
+      },
+      {
+        "period": -1,
+        "start": "12:00:00",
+        "end": "15:00:00"
+      },
+      {
         "period": 30,
-        "startTime": "12:00:00",
-        "endTime": "15:00:00"
-    },
-    {
-        "id": 3,
-        "quality": "3K",
-        "sleeping": false,
-        "period": 30,
-        "startTime": "15:00:00",
-        "endTime": "19:00:00"
-    },
-    {
-        "id": 4,
-        "quality": "3K",
-        "sleeping": true,
-        "period": 15,
-        "startTime": "19:00:00",
-        "endTime": "23:59:59"
-    }
-]
+        "start": "15:00:00",
+        "end": "19:00:00"
+      },{
+        "period": -1,
+        "start": "19:00:00",
+        "end": "23:59:59"
+      }
+    ]
+ }
