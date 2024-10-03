@@ -27,20 +27,23 @@ class Camera(ICamera):
 
         # Set the premade settings
         if config["quality"] == "4K":
-            self.width = 3840
-            self.height = 2160
+            self._width = 3840
+            self._height = 2160
         elif config["quality"] == "3K":
-            self.width = 2560
-            self.height = 1440
+            self._width = 2560
+            self._height = 1440
         elif config["quality"] == "HD":
-            self.width = 1920
-            self.height = 1080
+            self._width = 1920
+            self._height = 1080
         # If the specified quality is not found, default to 3K quality
         else:
-            self.width = 2560
-            self.height = 1440
+            self._width = 2560
+            self._height = 1440
             logging.error(f"Invalid quality specified: {config['quality']}. Defaulting to 3K quality.")
         logging.info("Camera instance created")
+
+        # Test logging
+        logging.info(f"Config quality: {config['quality']}")
 
     def start(self) -> None:
         """
@@ -54,7 +57,7 @@ class Camera(ICamera):
         ----------
         None
         """
-        config = self._cam.create_still_configuration({"size": (self.width, self.height)})
+        config = self._cam.create_still_configuration({"size": (self._width, self._height)})
         self._cam.configure(config)
         self._cam.options["quality"] = self._quality
         self._cam.set_controls({"AfMode": controls.AfModeEnum.Continuous})

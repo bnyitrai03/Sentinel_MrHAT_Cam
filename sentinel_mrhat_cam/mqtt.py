@@ -187,6 +187,11 @@ class MQTT(ICommunication):
             from .app_config import Config
 
             try:
+                # If they dont want to send a new config, just send a config-ok, and we will proceed without changing the configuration
+                if message.payload.decode() == "config-ok":
+                    self.config_received_event.set()
+                    return
+
                 # Parse the JSON message
                 config_data = json.loads(message.payload)
                 Config.validate_config(config_data)
@@ -211,9 +216,6 @@ class MQTT(ICommunication):
 
         self.client.on_message = on_message
         self.client.subscribe(self._subtopic)
-
-    def _reset_config_received_event(self) -> None:
-        self.config_received_event.clear()
 
     def init(self) -> None:
         pass
@@ -265,6 +267,11 @@ class MQTT(ICommunication):
             self.client.loop_stop()
             self.client.disconnect()
 
-    def wait_for_acknowledge(self, topic: str) -> None:
-        # Read paho, how to wait for sub ... TODO
-        pass
+    def wait_for_config(self, message: str, topic: str) -> None:
+        try:
+            self.config_received_event.clear()
+            self.send(message, topic)
+            self.config_received_event.wait(timeout=20)
+
+        except TimeoutError as e:
+            logging.error(f"Timeout error: {e}")

@@ -35,7 +35,7 @@ class Context:
     def __init__(self, logger: Logger):
         config = {
             "uuid": "8D8AC610-566D-4EF0-9C22-186B2A5ED793",
-            "quality": "3K",
+            "quality": "4K",
             "timing": [
                 {
                     "period": -1,
@@ -66,7 +66,7 @@ class Context:
         }
         self._state: State = InitState()
         self.config: Config = Config()
-        self.camera: ICamera = Camera(dummy_config)
+        self.camera: ICamera = Camera(config)
         self.communication: ICommunication = MQTT()
         self.rtc: IRTC = RTC()
         self.system: ISystem = System()
@@ -126,8 +126,7 @@ class CreateMessageState(State):
 
 class ConfigCheckState(State):
     def handle(self, app: Context) -> None:
-        app.communication.send(app.config.uuid, UUID_TOPIC)
-        app.communication.wait_for_acknowledge()
+        app.communication.wait_for_config(app.config.uuid, UUID_TOPIC)
 
 
 class TransmitState(State):

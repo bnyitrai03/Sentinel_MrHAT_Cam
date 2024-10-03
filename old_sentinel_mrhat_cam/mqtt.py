@@ -81,6 +81,7 @@ class MQTT:
             from .app_config import Config
 
             try:
+
                 # Parse the JSON message
                 config_data = json.loads(message.payload)
                 Config.validate_config(config_data)
