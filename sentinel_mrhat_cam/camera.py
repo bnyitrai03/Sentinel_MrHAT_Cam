@@ -22,7 +22,7 @@ class ICamera(ABC):
 
 class Camera(ICamera):
     def __init__(self, config: dict[str, str]) -> None:
-        self.quality = 95
+        self._quality = 95
         self._cam = Picamera2()
 
         # Set the premade settings

@@ -317,3 +317,4 @@ from .states import *
 from .mqtt import *
 from .schedule import *
 from .app_config import *
+from .message import *
