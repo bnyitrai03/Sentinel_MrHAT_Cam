@@ -18,7 +18,7 @@ F = TypeVar('F', bound=Callable[..., Any])
 
 class State(ABC):
     @abstractmethod
-    def handle(self, context: 'Context') -> None:
+    def handle(self, app: 'Context') -> None:
         pass
 
 
@@ -74,42 +74,44 @@ class Context:
 
 
 class InitState(State):
-    def handle(self, context: Context) -> None:
+    def handle(self, app: Context) -> None:
         logging.info("In InitState")
-        context.camera.start()
-        context.set_state(CreateMessageState())
+        app.camera.start()
+        app.set_state(CreateMessageState())
 
 
 class CreateMessageState(State):
-    def handle(self, context: Context) -> None:
+    def handle(self, app: Context) -> None:
         logging.info("In CreateMessageState")
-        context.set_state(InitState())
+        app.set_state(InitState())
 
-        """ context.message = context.message_creator.create_message()
-        context.communication.connect()
-        context.logger.start_remote_logging()
-        context.set_state(ConfigCheckState()) """
+        app.message = app.message_creator.create_message()
+
+        # Connect to the remote server
+        app.communication.connect()
+        app.logger.start_remote_logging()
+        app.set_state(ConfigCheckState())
 
 
 class ConfigCheckState(State):
-    def handle(self, context: Context) -> None:
-        context.communication.send(context.config.uuid, UUID_TOPIC)
-        context.communication.wait_for_acknowledge()
+    def handle(self, app: Context) -> None:
+        app.communication.send(app.config.uuid, UUID_TOPIC)
+        app.communication.wait_for_acknowledge()
 
 
 class TransmitState(State):
-    def handle(self, context: Context) -> None:
-        context.communication.send(context.message)
+    def handle(self, app: Context) -> None:
+        app.communication.send(app.message)
 
-        waiting_time = context.schedule.calculate_shutdown_duration()
-        if context.schedule.should_shutdown(waiting_time):
-            context.set_state(ShutDownState())
+        waiting_time = app.schedule.calculate_shutdown_duration()
+        if app.schedule.should_shutdown(waiting_time):
+            app.set_state(ShutDownState())
         else:
-            context.set_state(ConfigCheckState())
+            app.set_state(ConfigCheckState())
 
 
 class ShutDownState(State):
-    def handle(self, context: Context) -> None:
-        context.communication.disconnect()
-        context.logger.disconnect_remote_logging()
+    def handle(self, app: Context) -> None:
+        app.communication.disconnect()
+        app.logger.disconnect_remote_logging()
         # The system will shut down here and restart later
