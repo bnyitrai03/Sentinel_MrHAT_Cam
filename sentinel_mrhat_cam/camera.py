@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 import numpy as np
+from unittest.mock import MagicMock
 try:
     from libcamera import controls
     from picamera2 import Picamera2
@@ -12,7 +12,7 @@ import logging
 
 class ICamera(ABC):
     @abstractmethod
-    def capture(self) -> Optional[np.ndarray]:
+    def capture(self) -> np.ndarray:
         pass
 
     @abstractmethod
@@ -40,6 +40,7 @@ class Camera(ICamera):
             self.width = 2560
             self.height = 1440
             logging.error(f"Invalid quality specified: {config['quality']}. Defaulting to 3K quality.")
+        logging.info("Camera instance created")
 
     def start(self) -> None:
         """
@@ -58,8 +59,9 @@ class Camera(ICamera):
         self._cam.options["quality"] = self.quality
         self._cam.set_controls({"AfMode": controls.AfModeEnum.Continuous})
         self._cam.start(show_preview=False)
+        logging.info("Camera started")
 
-    def capture(self) -> Optional[np.ndarray]:  # type: ignore
+    def capture(self) -> np.ndarray:
         """
         Captures an image from the camera and returns it as numpy array.
 
@@ -72,5 +74,5 @@ class Camera(ICamera):
             image = self._cam.capture_array()
         except Exception as e:
             logging.error(f"Error during image capture: {e}")
-            return None
-        return image  # type: ignore
+            exit(1)
+        return image

@@ -22,11 +22,20 @@ class State(ABC):
         pass
 
 
+dummy_config = {
+    "quality": "3K",
+    "mode": "periodic",
+    "period": 15,
+    "wakeUpTime": "00:01:00",
+    "shutDownTime": "21:59:00"
+}
+
+
 class Context:
     def __init__(self, logger: Logger):
         self._state: State = InitState()
         self.config: Config = Config()
-        self.camera: ICamera = Camera()
+        self.camera: ICamera = Camera(dummy_config)
         self.communication: ICommunication = MQTT()
         self.rtc: IRTC = RTC()
         self.system: ISystem = System()
@@ -74,7 +83,8 @@ class InitState(State):
 class CreateMessageState(State):
     def handle(self, context: Context) -> None:
         logging.info("In CreateMessageState")
-        context.set_state(InitState())  # to debug
+        context.set_state(InitState())
+
         """ context.message = context.message_creator.create_message()
         context.communication.connect()
         context.logger.start_remote_logging()

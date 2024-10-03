@@ -1,14 +1,12 @@
 from .system import ISystem
 from .rtc import IRTC
 from .camera import ICamera
-from typing import Optional
 import numpy as np
 from PIL import Image
 import io
 import base64
-from .system import System, RTC
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 import json
 
 
@@ -18,7 +16,7 @@ class MessageCreator:
         self._rtc = rtc
         self._system = system
 
-    def _create_base64_image(self, image_array: Optional[np.ndarray]) -> str:
+    def _create_base64_image(self) -> str:
         """
         Converts a numpy array representing an image into a base64-encoded JPEG string.
 
@@ -54,10 +52,6 @@ class MessageCreator:
         # Get picture from camera
         image_array = self._camera.capture()
 
-        # If there was an error during image capture, return an error message
-        if image_array is None:
-            return "Error: Camera was unable to capture the image."
-
         image: Image.Image = Image.fromarray(image_array)
         image_bytes: io.BytesIO = io.BytesIO()
         image.save(image_bytes, format="JPEG")
@@ -91,7 +85,7 @@ class MessageCreator:
         logging.info(f"charger_voltage_now: {hardware_info['charger_voltage_now']}")
         logging.info(f"charger_current_now: {hardware_info['charger_current_now']}")
 
-    def create_message(self, image_array: Optional[np.ndarray], timestamp: str) -> str:  # type: ignore
+    def create_message(self) -> str:
         """
         Creates a JSON message containing image data, timestamp, CPU temperature,
         battery temperature, and battery charge percentage.
@@ -121,16 +115,21 @@ class MessageCreator:
         - The function also logs additional hardware information to a separate file for further analysis.
         """
         try:
-            hardware_info = System.get_hardware_info()
+            hardware_info = self._system.get_hardware_info()
+            timestamp = self._rtc.get_time()
+            image = self._create_base64_image()
 
             message: Dict[str, Any] = {
                 "timestamp": timestamp,
-                "image": self._create_base64_image(image_array),
+                "image": image,
+                "cpuTemp": hardware_info["cpu_temperature"],
+                "batteryTemp": hardware_info["battery_temperature"],
+                "batteryCharge": hardware_info["battery_percentage"],
             }
 
             # Log hardware info to a file for further analysis
             if hardware_info:
-                self.log_hardware_info(hardware_info)
+                self._log_hardware_info(hardware_info)
 
             return json.dumps(message)
 
