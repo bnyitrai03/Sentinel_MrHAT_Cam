@@ -502,4 +502,4 @@ class RTC:
 
         except Exception as e:
             logging.error(f"Error reading system time: {e}")
-            return datetime.now(pytz.UTC).isoformat()
+            exit(1)

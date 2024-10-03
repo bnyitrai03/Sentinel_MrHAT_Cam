@@ -28,10 +28,6 @@ class ICommunication(ABC):
         pass
 
     @abstractmethod
-    def init(self) -> None:
-        pass
-
-    @abstractmethod
     def is_connected(self) -> bool:
         pass
 
@@ -45,12 +41,44 @@ class ICommunication(ABC):
 
 
 class MQTT(ICommunication):
+    """
+    A class to handle MQTT client operations.
+
+    This class manages the connection to an MQTT broker, publishes messages,
+    and handles incoming configuration messages.
+
+    Attributes
+    ----------
+    _broker : str
+        The IPv4 address of the MQTT broker.
+    _broker_connect_counter : int
+        A counter to track reconnection attempts.
+    _subtopic : str
+        The topic to subscribe to for the incoming configuration file.
+    _port : int
+        The port number for the MQTT broker connection.
+    _qos : int
+        The Quality of Service level for MQTT messages.
+    client : mqtt_client.Client
+        The MQTT client instance.
+    config_received_event : threading.Event
+        An event to signal when a new configuration is received.
+    config_confirm_message : str
+        A message to confirm the receipt of a new configuration.
+
+    Notes
+    ------
+    - The MQTT broker connection is retried up to 20 times upon failure.
+    - This class requires the `paho-mqtt` library to be installed.
+    - The class uses configuration values from a `static_config` module, which should be present in the same package.
+    """
+
     def __init__(self):
         self._broker: str = BROKER
         self._port: int = PORT
         self._qos: int = QOS
         self._subtopic: str = CONFIGSUB_TOPIC
-        self.broker_connect_counter: int = 0
+        self._broker_connect_counter: int = 0
         self.client = mqtt_client.Client(mqtt_enums.CallbackAPIVersion.VERSION2)
         self.config_confirm_message: str = "config-nok|Confirm message uninitialized"
         self.config_received_event: threading.Event = threading.Event()
@@ -92,8 +120,8 @@ class MQTT(ICommunication):
         while not self._is_broker_available():
             logging.info("Waiting for broker to become available...")
             time.sleep(1)
-            self.broker_connect_counter += 1
-            if self.broker_connect_counter == 20:
+            self._broker_connect_counter += 1
+            if self._broker_connect_counter == 20:
                 logging.error("Connecting to network failed 20 times, restarting script...")
                 exit(1)
 
@@ -172,7 +200,7 @@ class MQTT(ICommunication):
         except Exception:
             exit(1)
 
-    def _init(self) -> None:
+    def _init_receive(self) -> None:
         """
         Initializes the MQTT client to receive the config file.
 
@@ -217,9 +245,6 @@ class MQTT(ICommunication):
         self.client.on_message = on_message
         self.client.subscribe(self._subtopic)
 
-    def init(self) -> None:
-        pass
-
     def is_connected(self) -> bool:
         return self.client.is_connected() if self.client else False
 
@@ -254,8 +279,44 @@ class MQTT(ICommunication):
 
         self._publish(message, topic)
 
-    def connect(self) -> Any:
-        self._broker_check()
+    def connect(self) -> None:
+        """
+        Connect to the MQTT broker.
+
+        This method sets up various callbacks for connection events and
+        attempts to establish a connection to the MQTT broker.
+
+        Returns
+        -------
+        mqtt_client.Client
+            The connected MQTT client instance.
+        """
+        try:
+
+            def on_connect(client: Any, userdata: Any, flags: Any, reason_code: Any, properties: Any) -> None:
+                if reason_code == 0:
+                    logging.info("Connected to MQTT Broker!")
+                else:
+                    logging.error(f"Failed to connect, return code {reason_code}")
+
+            # checking the connection to the broker in a blocking way
+            self._broker_check()
+
+            self.client.on_connect = on_connect
+            self.client.username_pw_set(USERNAME, PASSWORD)
+            self.client.disable_logger()
+
+            self.client.connect(self._broker, self._port)
+            # Resetting the counter after a successful connection
+            self.broker_connect_counter = 0
+            self.client.loop_start()
+
+            # Subscribe to the topic and start listening
+            self._init_receive()
+
+        except Exception as e:
+            logging.error(f"Error connecting to MQTT broker: {e}")
+            exit(1)
 
     def disconnect(self) -> None:
         """

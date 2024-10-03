@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Optional
 import numpy as np
 from unittest.mock import MagicMock
 try:
@@ -12,7 +13,7 @@ import logging
 
 class ICamera(ABC):
     @abstractmethod
-    def capture(self) -> np.ndarray:
+    def capture(self) -> Optional[np.ndarray]:
         pass
 
     @abstractmethod
@@ -49,7 +50,7 @@ class Camera(ICamera):
         """
         Configures and starts the camera with the settings from the config file.
 
-        This function sets up the camera configuration based on the width and height
+        This function sets up the camera configuration based on the _width and _height
         attributes, applies the quality setting, and sets the autofocus mode to continuous.
         Finally, it starts the camera.
 
@@ -64,7 +65,7 @@ class Camera(ICamera):
         self._cam.start(show_preview=False)
         logging.info("Camera started")
 
-    def capture(self) -> np.ndarray:
+    def capture(self) -> Optional[np.ndarray]:
         """
         Captures an image from the camera and returns it as numpy array.
 

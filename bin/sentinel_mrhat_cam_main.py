@@ -38,6 +38,7 @@ def main():
     app = Context(logger)
     while True:
         app.request()
+        # !!!!!!!!!!!!!!!!!!
         time.sleep(5)  # !!!
 
 

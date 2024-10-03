@@ -114,7 +114,6 @@ class InitState(State):
 class CreateMessageState(State):
     def handle(self, app: Context) -> None:
         logging.info("In CreateMessageState")
-        app.set_state(InitState())
 
         app.message = app.message_creator.create_message()
 
