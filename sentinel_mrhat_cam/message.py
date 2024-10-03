@@ -6,7 +6,8 @@ import numpy as np
 from PIL import Image
 import io
 import base64
-from .system import System, RTC
+from .system import System
+from .rtc import RTC
 import logging
 from typing import Dict, Any, Optional
 import json
@@ -80,10 +81,6 @@ class MessageCreator:
         with open("hardware_log.txt", "a") as log_file:
             log_file.write(f"{log_entry}\n")
 
-        logging.info(f"battery_temperature: {hardware_info['battery_temperature']}")  # add to hardware_info
-        logging.info(f"battery_percentage: {hardware_info['battery_percentage']}")  # add to hardware_info
-        logging.info(f"cpu_temperature: {hardware_info['cpu_temperature']}")  # add to hardware_info
-
         logging.info(f"battery_voltage_now: {hardware_info['battery_voltage_now']}")
         logging.info(f"battery_voltage_avg: {hardware_info['battery_voltage_avg']}")
         logging.info(f"battery_current_now: {hardware_info['battery_current_now']}")
@@ -121,11 +118,14 @@ class MessageCreator:
         - The function also logs additional hardware information to a separate file for further analysis.
         """
         try:
-            hardware_info = System.get_hardware_info()
+            hardware_info = _system.get_hardware_info()
 
             message: Dict[str, Any] = {
                 "timestamp": timestamp,
                 "image": self._create_base64_image(image_array),
+                "cpuTemp": cpu_temp,
+                "batteryTemp": battery_info["temperature"],
+                "batteryCharge": battery_info["percentage"],
             }
 
             # Log hardware info to a file for further analysis

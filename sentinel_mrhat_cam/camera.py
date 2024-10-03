@@ -22,7 +22,7 @@ class ICamera(ABC):
 
 class Camera(ICamera):
     def __init__(self, config: dict[str, str]) -> None:
-        self.quality = 95
+        self._quality = 95
         self._cam = Picamera2()
 
         # Set the premade settings
@@ -72,5 +72,5 @@ class Camera(ICamera):
             image = self._cam.capture_array()
         except Exception as e:
             logging.error(f"Error during image capture: {e}")
-            return None
+            exit(1)
         return image  # type: ignore

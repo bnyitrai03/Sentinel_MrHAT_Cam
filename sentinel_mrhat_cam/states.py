@@ -12,7 +12,7 @@ from .message import MessageCreator
 from .logger import Logger
 
 from .schedule import Schedule
-from .static_config import UUID_TOPIC
+from .static_config import UUID_TOPIC, LOG_CONFIG_PATH
 F = TypeVar('F', bound=Callable[..., Any])
 
 
@@ -24,8 +24,39 @@ class State(ABC):
 
 class Context:
     def __init__(self, logger: Logger):
+        config = {
+            "uuid": "8D8AC610-566D-4EF0-9C22-186B2A5ED793",
+            "quality": "3K",
+            "timing": [
+                {
+                    "period": -1,
+                    "start": "00:00:00",
+                    "end": "07:00:00"
+                },
+                {
+                    "period": 30,
+                    "start": "07:00:00",
+                    "end": "12:00:00"
+                },
+                {
+                    "period": -1,
+                    "start": "12:00:00",
+                    "end": "15:00:00"
+                },
+                {
+                    "period": 30,
+                    "start": "15:00:00",
+                    "end": "19:00:00"
+                },
+                {
+                    "period": -1,
+                    "start": "19:00:00",
+                    "end": "23:59:59"
+                }
+            ]
+        }
         self._state: State = InitState()
-        self.config: Config = Config()
+        self.config: Config = Config(config)
         self.camera: ICamera = Camera()
         self.communication: ICommunication = MQTT()
         self.rtc: IRTC = RTC()
@@ -75,16 +106,17 @@ class CreateMessageState(State):
     def handle(self, context: Context) -> None:
         logging.info("In CreateMessageState")
         context.set_state(InitState())  # to debug
-        """ context.message = context.message_creator.create_message()
+        context.message = context.message_creator.create_message()
         context.communication.connect()
         context.logger.start_remote_logging()
-        context.set_state(ConfigCheckState()) """
+        context.set_state(ConfigCheckState())
 
 
 class ConfigCheckState(State):
     def handle(self, context: Context) -> None:
-        context.communication.send(context.config.uuid, UUID_TOPIC)
-        context.communication.wait_for_acknowledge()
+        # context.communication.send(context.config.uuid, UUID_TOPIC)
+        # context.communication.wait_for_acknowledge()
+        exit(1)
 
 
 class TransmitState(State):
