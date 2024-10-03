@@ -22,6 +22,15 @@ class State(ABC):
         pass
 
 
+dummy_config = {
+    "quality": "3K",
+    "mode": "periodic",
+    "period": 15,
+    "wakeUpTime": "00:01:00",
+    "shutDownTime": "21:59:00"
+}
+
+
 class Context:
     def __init__(self, logger: Logger):
         config = {
