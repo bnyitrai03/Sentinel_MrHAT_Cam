@@ -53,11 +53,11 @@ class Camera(ICamera):
         ----------
         None
         """
-        config = self.cam.create_still_configuration({"size": (self.width, self.height)})
-        self.cam.configure(config)
-        self.cam.options["quality"] = self.quality
-        self.cam.set_controls({"AfMode": controls.AfModeEnum.Continuous})
-        self.cam.start(show_preview=False)
+        config = self._cam.create_still_configuration({"size": (self.width, self.height)})
+        self._cam.configure(config)
+        self._cam.options["quality"] = self.quality
+        self._cam.set_controls({"AfMode": controls.AfModeEnum.Continuous})
+        self._cam.start(show_preview=False)
 
     def capture(self) -> Optional[np.ndarray]:  # type: ignore
         """
@@ -69,7 +69,7 @@ class Camera(ICamera):
             The captured image as a numpy array.
         """
         try:
-            image = self.cam.capture_array()
+            image = self._cam.capture_array()
         except Exception as e:
             logging.error(f"Error during image capture: {e}")
             return None

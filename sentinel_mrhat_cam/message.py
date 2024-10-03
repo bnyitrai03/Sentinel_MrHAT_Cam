@@ -7,6 +7,9 @@ from PIL import Image
 import io
 import base64
 from .system import System, RTC
+import logging
+from typing import Dict, Any, Optional
+import json
 
 
 class MessageCreator:
@@ -48,8 +51,9 @@ class MessageCreator:
         the image capturing function will provide `None` as the return value.
         This way we can log the error through MQTT when it connects.
         """
-
+        # Get picture from camera
         image_array = self._camera.capture()
+
         # If there was an error during image capture, return an error message
         if image_array is None:
             return "Error: Camera was unable to capture the image."
@@ -61,12 +65,75 @@ class MessageCreator:
 
         return base64.b64encode(image_data).decode("utf-8")
 
-    def create_message(self) -> str:
-        hardware_info = System.gather_hardware_info()
+    def _log_hardware_info(self, hardware_info: Dict[str, Any]) -> None:
+        """
+        Logs the provided hardware information to a file.
+        This file will be the input of a Matlab script which plots the system metrics.
 
-    def log_hardware_info(self) -> None:
-        pass
+        Parameters
+        ----------
+        hardware_info : Dict[str, Any]
+            A dictionary containing hardware information such as CPU temperature,
+            battery temperature, and other system metrics.
+        """
+        log_entry = ", ".join(f"{k}={v}" for k, v in hardware_info.items())
+        with open("hardware_log.txt", "a") as log_file:
+            log_file.write(f"{log_entry}\n")
 
-        # image = context.camera.capture()
-        # timestamp = context.rtc.get_time()
-        # get hardware info
+        logging.info(f"battery_temperature: {hardware_info['battery_temperature']}")  # add to hardware_info
+        logging.info(f"battery_percentage: {hardware_info['battery_percentage']}")  # add to hardware_info
+        logging.info(f"cpu_temperature: {hardware_info['cpu_temperature']}")  # add to hardware_info
+
+        logging.info(f"battery_voltage_now: {hardware_info['battery_voltage_now']}")
+        logging.info(f"battery_voltage_avg: {hardware_info['battery_voltage_avg']}")
+        logging.info(f"battery_current_now: {hardware_info['battery_current_now']}")
+        logging.info(f"battery_current_avg: {hardware_info['battery_current_avg']}")
+        logging.info(f"charger_voltage_now: {hardware_info['charger_voltage_now']}")
+        logging.info(f"charger_current_now: {hardware_info['charger_current_now']}")
+
+    def create_message(self, image_array: Optional[np.ndarray], timestamp: str) -> str:  # type: ignore
+        """
+        Creates a JSON message containing image data, timestamp, CPU temperature,
+        battery temperature, and battery charge percentage.
+
+        Parameters
+        ----------
+        image_array : numpy.ndarray
+            The image data as a numpy array. This data is converted into a base64-encoded
+            JPEG string before being included in the JSON message.
+        timestamp : str
+            The timestamp in ISO 8601 format.
+
+        Returns
+        -------
+        str
+            The whole JSON message as a string.
+
+        Raises
+        ------
+        Exception
+            If any error occurs during the process of creating the message, such as
+            failing to retrieve system information or converting the image to base64.
+            The exception is logged, and the error is re-raised.
+
+        Notes
+        -----
+        - The function also logs additional hardware information to a separate file for further analysis.
+        """
+        try:
+            hardware_info = System.get_hardware_info()
+
+            message: Dict[str, Any] = {
+                "timestamp": timestamp,
+                "image": self._create_base64_image(image_array),
+            }
+
+            # Log hardware info to a file for further analysis
+            if hardware_info:
+                self.log_hardware_info(hardware_info)
+
+            return json.dumps(message)
+
+        except Exception as e:
+            logging.error(f"Problem creating the message: {e}")
+            raise
