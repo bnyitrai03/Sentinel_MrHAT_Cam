@@ -65,8 +65,8 @@ class Context:
             ]
         }
         self._state: State = InitState()
-        self.config: Config = Config(config)
-        self.camera: ICamera = Camera()
+        self.config: Config = Config()
+        self.camera: ICamera = Camera(dummy_config)
         self.communication: ICommunication = MQTT()
         self.rtc: IRTC = RTC()
         self.system: ISystem = System()
