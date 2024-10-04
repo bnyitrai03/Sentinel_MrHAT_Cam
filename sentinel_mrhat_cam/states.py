@@ -12,7 +12,7 @@ from .message import MessageCreator
 from .logger import Logger
 
 from .schedule import Schedule
-from .static_config import UUID_TOPIC, LOG_CONFIG_PATH
+from .static_config import UUID_TOPIC, IMAGE_TOPIC
 F = TypeVar('F', bound=Callable[..., Any])
 
 
@@ -32,6 +32,9 @@ dummy_config = {
 
 
 class Context:
+    # static varibale to measure the accumulated runtime of the application
+    runtime: float = 0.0  # need to reset if we don't shut down
+
     def __init__(self, logger: Logger):
         config = {
             "uuid": "8D8AC610-566D-4EF0-9C22-186B2A5ED793",
@@ -82,7 +85,17 @@ class Context:
     def set_state(self, state: State) -> None:
         self._state = state
 
-    def log_execution_time(operation_name: Optional[str] = None) -> Callable[[F], F]:
+    @staticmethod
+    def log_and_save_execution_time(operation_name: Optional[str] = None) -> Callable[[F], F]:
+        """
+        Saves the execution time of the function to the `runtime` variable.
+
+        Args:
+            operation_name (Optional[str], optional): Operation description. Defaults to None.
+
+        Returns:
+            Callable[[F], F]: Wrapped function with logging.
+        """
         def decorator(func: F) -> F:
             @wraps(func)
             def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -96,7 +109,11 @@ class Context:
                 else:
                     log_message = f"{func.__name__} took {execution_time:.6f} seconds"
 
+                # Update the class-level runtime
+                Context.runtime += execution_time
+                # Log the message using logger
                 logging.info(log_message)
+
                 return result
 
             return cast(F, wrapper)
@@ -105,6 +122,7 @@ class Context:
 
 
 class InitState(State):
+    @Context.log_and_save_execution_time(operation_name="InitState handle")
     def handle(self, app: Context) -> None:
         logging.info("In InitState")
         app.camera.start()
@@ -112,9 +130,9 @@ class InitState(State):
 
 
 class CreateMessageState(State):
+    @Context.log_and_save_execution_time(operation_name="CreateMessageState handle")
     def handle(self, app: Context) -> None:
         logging.info("In CreateMessageState")
-
         app.message = app.message_creator.create_message()
 
         # Connect to the remote server
@@ -124,13 +142,17 @@ class CreateMessageState(State):
 
 
 class ConfigCheckState(State):
+    @Context.log_and_save_execution_time(operation_name="ConfigCheckState handle")
     def handle(self, app: Context) -> None:
+        logging.info("In ConfigCheckState")
         app.communication.wait_for_config(app.config.uuid, UUID_TOPIC)
+        app.set_state(TransmitState())
 
 
 class TransmitState(State):
     def handle(self, app: Context) -> None:
-        app.communication.send(app.message)
+        logging.info("In TransmitState")
+        app.communication.send(app.message, IMAGE_TOPIC)
 
         waiting_time = app.schedule.calculate_shutdown_duration()
         if app.schedule.should_shutdown(waiting_time):
@@ -141,6 +163,7 @@ class TransmitState(State):
 
 class ShutDownState(State):
     def handle(self, app: Context) -> None:
+        logging.info("In ShutDownState")
         app.communication.disconnect()
         app.logger.disconnect_remote_logging()
         # The system will shut down here and restart later

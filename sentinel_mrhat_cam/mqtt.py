@@ -36,7 +36,7 @@ class ICommunication(ABC):
         pass
 
     @abstractmethod
-    def wait_for_acknowledge(self, topic: str) -> None:
+    def wait_for_config(self, message: str, topic: str) -> None:
         pass
 
 
@@ -215,7 +215,8 @@ class MQTT(ICommunication):
             from .app_config import Config
 
             try:
-                # If they dont want to send a new config, just send a config-ok, and we will proceed without changing the configuration
+                # If they dont want to send a new config, just send a config-ok,
+                # and we will proceed without changing the configuration
                 if message.payload.decode() == "config-ok":
                     self.config_received_event.set()
                     return
@@ -270,8 +271,6 @@ class MQTT(ICommunication):
         publish the message.
         - If MQTT logging is not already initialized, the method triggers its start
         to ensure that all communication is logged appropriately.
-        - This method is decorated with `@log_execution_time`, which logs the time
-        taken to execute the method.
         """
 
         if not self.is_connected():
@@ -328,11 +327,11 @@ class MQTT(ICommunication):
             self.client.loop_stop()
             self.client.disconnect()
 
-    def wait_for_config(self, message: str, topic: str) -> None:
+    def wait_for_config(self, uuid: str, topic: str) -> None:
         try:
             self.config_received_event.clear()
-            self.send(message, topic)
-            self.config_received_event.wait(timeout=20)
+            self.send(uuid, topic)
+            self.config_received_event.wait(timeout=30)
 
         except TimeoutError as e:
             logging.error(f"Timeout error: {e}")

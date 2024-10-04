@@ -38,8 +38,6 @@ def main():
     app = Context(logger)
     while True:
         app.request()
-        # !!!!!!!!!!!!!!!!!!
-        time.sleep(5)  # !!!
 
 
 def _set_up_configuration():
