@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import time
 import logging
 from functools import wraps
-from typing import Optional, Any, TypeVar, Callable, cast
+from typing import Optional, Any, TypeVar, Callable, cast, Union
 from .camera import ICamera, Camera
 from .mqtt import ICommunication, MQTT
 from .rtc import IRTC, RTC
@@ -12,7 +12,7 @@ from .message import MessageCreator
 from .logger import Logger
 
 from .schedule import Schedule
-from .static_config import UUID_TOPIC, IMAGE_TOPIC
+from .static_config import UUID_TOPIC, IMAGE_TOPIC, SHUTDOWN_THRESHOLD, TIME_TO_BOOT_AND_SHUTDOWN
 F = TypeVar('F', bound=Callable[..., Any])
 
 
@@ -20,15 +20,6 @@ class State(ABC):
     @abstractmethod
     def handle(self, app: 'Context') -> None:
         pass
-
-
-dummy_config = {
-    "quality": "3K",
-    "mode": "periodic",
-    "period": 15,
-    "wakeUpTime": "00:01:00",
-    "shutDownTime": "21:59:00"
-}
 
 
 class Context:
@@ -122,7 +113,7 @@ class Context:
 
 
 class InitState(State):
-    @Context.log_and_save_execution_time(operation_name="InitState handle")
+    @Context.log_and_save_execution_time(operation_name="InitState")
     def handle(self, app: Context) -> None:
         logging.info("In InitState \n")
         app.camera.start()
@@ -135,7 +126,7 @@ class CreateMessageState(State):
         logging.info("In CreateMessageState \n")
         app.message = app.message_creator.create_message()
 
-        # Connect to the remote server if connected already
+        # Connect to the remote server if not connected already
         if not app.communication.is_connected():
             app.communication.connect()
             app.logger.start_remote_logging()
@@ -144,38 +135,53 @@ class CreateMessageState(State):
 
 
 class ConfigCheckState(State):
-    @Context.log_and_save_execution_time(operation_name="ConfigCheckState handle")
+    @Context.log_and_save_execution_time(operation_name="ConfigCheckState")
     def handle(self, app: Context) -> None:
         logging.info("In ConfigCheckState \n")
         app.communication.wait_for_config(app.config.uuid, UUID_TOPIC)
-        app.set_state(TransmitState())
+
+        # check if the Pi is not within working hours
+        if app.schedule.should_shutdown(app.config.active["start"], app.config.active["end"]):
+            app.set_state(ShutdownState())
+        else:
+            app.set_state(TransmitState())
 
 
 class TransmitState(State):
-    @Context.log_and_save_execution_time(operation_name="TransmitState handle")
+    @Context.log_and_save_execution_time(operation_name="TransmitState")
     def handle(self, app: Context) -> None:
         logging.info("In TransmitState")
         app.communication.send(app.message, IMAGE_TOPIC)
-        app.set_state(ShutDownState())
+        app.set_state(ShutdownState())
 
 
-class ShutDownState(State):
+class ShutdownState(State):
     def handle(self, app: Context) -> None:
         logging.info("In ShutDownState")
-
         # Keep this during development
-        logging.info(f"Runtime: {Context.runtime}")
+        logging.info(f"Accumulated runtime: {app.runtime}")
 
-        # This wouldnt work if it were in the TransmitState, because the runtime variable is only updated after the function has ran,
-        # so this needs to be in shutdown state
-        desired_shutdown_duration = app.schedule.calculate_shutdown_duration(Context.runtime)
-        should_we_shut_down = app.schedule.should_shutdown(desired_shutdown_duration)
+        period: int = app.config.active["period"]
+        waiting_time: float = max(period - app.runtime, 0)
 
-        if should_we_shut_down:
-            pass
+        # If the period is negative then we must wake up at the end of this time interval
+        if period < 0:
+            local_wake_time = app.schedule.adjust_time(app.config.active["end"])
+            self.shutdown(app, local_wake_time)
+
+        # If the time to wait is longer than the threshold then the Pi shuts down before taking the next picture
+        elif waiting_time > SHUTDOWN_THRESHOLD:
+            shutdown_duration = max(waiting_time - TIME_TO_BOOT_AND_SHUTDOWN, 0)
+            self.shutdown(app, shutdown_duration)
+
+        # If the time to wait before taking the next image is short, then we sleep that much
         else:
+            time.sleep(waiting_time)
+            # reset the runtime
+            app.runtime = 0
             app.set_state(CreateMessageState())
 
+    def shutdown(self, app: Context, wake_time: Union[str, int, float]) -> None:
         app.communication.disconnect()
         app.logger.disconnect_remote_logging()
-        # The system will shut down here and restart later
+        app.system.schedule_wakeup(wake_time)
