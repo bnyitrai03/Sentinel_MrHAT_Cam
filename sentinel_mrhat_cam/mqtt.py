@@ -214,6 +214,9 @@ class MQTT(ICommunication):
         def on_message(client: Any, userdata: Any, message: Any) -> None:
             from .app_config import Config
 
+            # Debugging
+            logging.info(f"Received message: {message.payload.decode()}")
+
             try:
                 # If they dont want to send a new config, just send a config-ok,
                 # and we will proceed without changing the configuration
@@ -246,6 +249,9 @@ class MQTT(ICommunication):
         self.client.on_message = on_message
         self.client.subscribe(self._subtopic)
 
+        # Debugging
+        logging.info(f"Subscribed to topic: {self._subtopic}")
+
     def is_connected(self) -> bool:
         return self.client.is_connected() if self.client else False
 
@@ -273,10 +279,15 @@ class MQTT(ICommunication):
         to ensure that all communication is logged appropriately.
         """
 
+        logging.info("Entering send method")
         if not self.is_connected():
+            print("Not connected, attempting to connect")
             self.connect()
+        else:
+            print("Already connected, proceeding with publish")
 
         self._publish(message, topic)
+        print("Message published")
 
     def connect(self) -> None:
         """
@@ -331,7 +342,7 @@ class MQTT(ICommunication):
         try:
             self.config_received_event.clear()
             self.send(uuid, topic)
-            self.config_received_event.wait(timeout=30)
+            self.config_received_event.wait(timeout=5)
 
         except TimeoutError as e:
             logging.error(f"Timeout error: {e}")
