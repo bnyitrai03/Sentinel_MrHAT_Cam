@@ -23,8 +23,7 @@ class State(ABC):
 
 
 class Context:
-    # static varibale to measure the accumulated runtime of the application
-    runtime: float = 0.0  # need to reset if we don't shut down
+    runtime: float = 0.0  # static varibale to measure the accumulated runtime of the application
 
     def __init__(self, logger: Logger):
         config = {
@@ -116,7 +115,7 @@ class InitState(State):
     @Context.log_and_save_execution_time(operation_name="InitState")
     def handle(self, app: Context) -> None:
         logging.info("In InitState \n")
-        app.camera.start()
+        # app.camera.start()
         app.set_state(CreateMessageState())
 
 
@@ -161,18 +160,20 @@ class ShutdownState(State):
         # Keep this during development
         logging.info(f"Accumulated runtime: {app.runtime}")
 
-        period: int = app.config.active["period"]
-        waiting_time: float = max(period - app.runtime, 0)
+        period: int = app.config.active["period"]  # period of the message sending
+        waiting_time: float = max(period - app.runtime, 0)  # time to wait in between the new message creation
+        self._shutdown_mode(period, waiting_time)
 
+    def _shutdown_mode(self, app: Context, period: int, waiting_time: float) -> None:
         # If the period is negative then we must wake up at the end of this time interval
         if period < 0:
             local_wake_time = app.schedule.adjust_time(app.config.active["end"])
-            self.shutdown(app, local_wake_time)
+            self._shutdown(app, local_wake_time)
 
         # If the time to wait is longer than the threshold then the Pi shuts down before taking the next picture
         elif waiting_time > SHUTDOWN_THRESHOLD:
             shutdown_duration = max(waiting_time - TIME_TO_BOOT_AND_SHUTDOWN, 0)
-            self.shutdown(app, shutdown_duration)
+            self._shutdown(app, shutdown_duration)
 
         # If the time to wait before taking the next image is short, then we sleep that much
         else:
@@ -181,7 +182,7 @@ class ShutdownState(State):
             app.runtime = 0
             app.set_state(CreateMessageState())
 
-    def shutdown(self, app: Context, wake_time: Union[str, int, float]) -> None:
+    def _shutdown(self, app: Context, wake_time: Union[str, int, float]) -> None:
         app.communication.disconnect()
         app.logger.disconnect_remote_logging()
         app.system.schedule_wakeup(wake_time)
