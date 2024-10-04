@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any, Union
 import subprocess
+import logging
 from datetime import datetime
 try:
     from gpiozero import CPUTemperature
