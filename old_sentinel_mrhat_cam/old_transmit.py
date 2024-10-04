@@ -6,13 +6,13 @@ from PIL import Image
 import base64
 from datetime import datetime
 import numpy as np
-from .utils import log_execution_time
-from .static_config import IMAGETOPIC, MINIMUM_WAIT_TIME
-from .system import System, RTC
-from .camera import Camera
-from .mqtt import MQTT
-from .schedule import Schedule
-from .logger import Logger
+from .old_utils import log_execution_time
+from .old_static_config import IMAGETOPIC, MINIMUM_WAIT_TIME
+from .old_system import System, RTC
+from .old_camera import Camera
+from .old_mqtt import MQTT
+from .old_schedule import Schedule
+from .old_logger import Logger
 
 
 class Transmit:

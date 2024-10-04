@@ -1,6 +1,7 @@
 from datetime import datetime, time
 from datetime import timedelta
 import pytz
+from .static_config import TIME_TO_BOOT_AND_SHUTDOWN
 
 
 class Schedule:
@@ -10,13 +11,13 @@ class Schedule:
     def adjust_time(self, timestamp: str) -> str:
         pass
 
-    def calculate_shutdown_duration(self, waiting_time: float) -> float:
+    def calculate_shutdown_duration(self, app_run_time: float) -> float:
         pass
 
-    def get_wake_time(self, shutdown_duration: float) -> datetime:
+    def get_wake_time(self, time_spent_shutdown: float) -> datetime:
         pass
 
-    def should_shutdown(self, waiting_time: float) -> bool:
+    def should_shutdown(self, desired_shutdown_dutarion: float) -> bool:
         pass
 
     def shutdown(self, waiting_time: float, current_time: datetime) -> None:

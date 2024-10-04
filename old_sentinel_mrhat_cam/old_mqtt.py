@@ -10,7 +10,7 @@ except ImportError:
     mqtt_client = None  # type: ignore
     mqtt_enums = None  # type: ignore
 
-from .static_config import BROKER, CONFIGSUBTOPIC, PORT, QOS, TEMP_CONFIG_PATH, CONFIG_PATH, USERNAME, PASSWORD
+from .old_static_config import BROKER, CONFIGSUBTOPIC, PORT, QOS, TEMP_CONFIG_PATH, CONFIG_PATH, USERNAME, PASSWORD
 
 import json
 import socket
@@ -78,7 +78,7 @@ class MQTT:
         """
 
         def on_message(client: Any, userdata: Any, message: Any) -> None:
-            from .app_config import Config
+            from .old_app_config import Config
 
             try:
 

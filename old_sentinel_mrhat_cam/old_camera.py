@@ -7,7 +7,7 @@ try:
 except ImportError:
     Picamera2 = MagicMock()
     controls = MagicMock()
-from .utils import log_execution_time
+from .old_utils import log_execution_time
 import logging
 import numpy as np
 

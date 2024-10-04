@@ -1,8 +1,8 @@
 from datetime import datetime, time
 from datetime import timedelta
 import logging
-from .static_config import TIME_TO_BOOT_AND_SHUTDOWN, SHUTDOWN_THRESHOLD
-from .system import System, RTC
+from .old_static_config import TIME_TO_BOOT_AND_SHUTDOWN, SHUTDOWN_THRESHOLD
+from .old_system import System, RTC
 import pytz
 
 

@@ -308,13 +308,13 @@ If you measure the data while the device does not receive any power through the 
 - **SD card**: [SanDisk microSDHC Ultra 32GB](https://www.alza.hu/sandisk-microsdhc-ultra-32gb-sd-adapter-d6250713.htm?kampan=arukereso_hu_prislusenstvi-pro-it-tv_pametove-karty_microsdhc/xc_dt807j2f2b1b&utm_source=arukereso_hu&utm_medium=product&utm_campaign=arukereso_hu_prislusenstvi-pro-it-tv_pametove-karty_microsdhc/xc_dt807j2f2b1b&aku=324206e06a9b4d5089a463dab6911ac6)
 """
 
-from .static_config import *
-from .utils import *
-from .logger import *
-from .system import *
-from .mqtt import *
-from .schedule import *
-from .app_config import *
-from .camera import *
-from .transmit import *
-from .app import *
+from .old_static_config import *
+from .old_utils import *
+from .old_logger import *
+from .old_system import *
+from .old_mqtt import *
+from .old_schedule import *
+from .old_app_config import *
+from .old_camera import *
+from .old_transmit import *
+from .old_app import *

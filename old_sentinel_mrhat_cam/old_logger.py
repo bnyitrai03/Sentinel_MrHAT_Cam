@@ -7,7 +7,7 @@ import os
 import threading
 from queue import Queue, Empty
 from multiprocessing.pool import ThreadPool
-from .static_config import LOGGING_TOPIC, LOG_LEVEL
+from .old_static_config import LOGGING_TOPIC, LOG_LEVEL
 
 
 class Logger(logging.Handler):
@@ -103,7 +103,7 @@ class Logger(logging.Handler):
         This method creates an instance of the MQTT class, connects to the MQTT
         broker, and signals that MQTT logging has started.
         """
-        from .mqtt import MQTT
+        from .old_mqtt import MQTT
 
         self.mqtt = MQTT()
         self.mqtt.connect()

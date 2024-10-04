@@ -3,8 +3,8 @@ import json
 import re
 from typing import Any
 
-from .mqtt import MQTT
-from .static_config import CONFIGACKTOPIC, MINIMUM_WAIT_TIME, MAXIMUM_WAIT_TIME
+from .old_mqtt import MQTT
+from .old_static_config import CONFIGACKTOPIC, MINIMUM_WAIT_TIME, MAXIMUM_WAIT_TIME
 
 
 class Config:

@@ -1,13 +1,13 @@
 import logging
-from .mqtt import MQTT
-from .camera import Camera
-from .app_config import Config
-from .utils import log_execution_time
-from .static_config import CONFIGACKTOPIC
-from .schedule import Schedule
-from .logger import Logger
-from .transmit import Transmit
-from .system import System
+from .old_mqtt import MQTT
+from .old_camera import Camera
+from .old_app_config import Config
+from .old_utils import log_execution_time
+from .old_static_config import CONFIGACKTOPIC
+from .old_schedule import Schedule
+from .old_logger import Logger
+from .old_transmit import Transmit
+from .old_system import System
 
 
 class App:

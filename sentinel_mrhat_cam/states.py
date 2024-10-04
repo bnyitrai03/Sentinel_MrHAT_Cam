@@ -124,7 +124,7 @@ class Context:
 class InitState(State):
     @Context.log_and_save_execution_time(operation_name="InitState handle")
     def handle(self, app: Context) -> None:
-        logging.info("In InitState")
+        logging.info("In InitState \n")
         app.camera.start()
         app.set_state(CreateMessageState())
 
@@ -132,7 +132,8 @@ class InitState(State):
 class CreateMessageState(State):
     @Context.log_and_save_execution_time(operation_name="CreateMessageState handle")
     def handle(self, app: Context) -> None:
-        logging.info("In CreateMessageState")
+        logging.info("In CreateMessageState \n")
+        app.schedule.working_time_check()
         app.message = app.message_creator.create_message()
 
         # Connect to the remote server
@@ -144,26 +145,34 @@ class CreateMessageState(State):
 class ConfigCheckState(State):
     @Context.log_and_save_execution_time(operation_name="ConfigCheckState handle")
     def handle(self, app: Context) -> None:
-        logging.info("In ConfigCheckState")
-        app.communication.wait_for_config(app.config.uuid, UUID_TOPIC)
+        logging.info("In ConfigCheckState \n")
+        # app.communication.wait_for_config(app.config.uuid, UUID_TOPIC)
         app.set_state(TransmitState())
 
 
 class TransmitState(State):
+    @Context.log_and_save_execution_time(operation_name="TransmitState handle")
     def handle(self, app: Context) -> None:
         logging.info("In TransmitState")
         app.communication.send(app.message, IMAGE_TOPIC)
-
-        waiting_time = app.schedule.calculate_shutdown_duration()
-        if app.schedule.should_shutdown(waiting_time):
-            app.set_state(ShutDownState())
-        else:
-            app.set_state(ConfigCheckState())
+        app.set_state(ShutDownState())
 
 
 class ShutDownState(State):
     def handle(self, app: Context) -> None:
         logging.info("In ShutDownState")
+
+        # Keep this during development
+        logging.info(f"Runtime: {Context.runtime}")
+
+        # This wouldnt work if it were in the TransmitState, because the runtime variable is only updated after the function has ran,
+        # so this needs to be in shutdown state
+        desired_shutdown_duration = app.schedule.calculate_shutdown_duration(Context.runtime)
+        if app.schedule.should_shutdown(desired_shutdown_duration):
+            app.set_state(ShutDownState())
+        else:
+            app.set_state(CreateMessageState())
+
         app.communication.disconnect()
         app.logger.disconnect_remote_logging()
         # The system will shut down here and restart later
