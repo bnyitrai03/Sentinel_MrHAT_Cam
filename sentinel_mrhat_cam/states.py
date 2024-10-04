@@ -130,15 +130,16 @@ class InitState(State):
 
 
 class CreateMessageState(State):
-    @Context.log_and_save_execution_time(operation_name="CreateMessageState handle")
+    @Context.log_and_save_execution_time(operation_name="CreateMessageState")
     def handle(self, app: Context) -> None:
         logging.info("In CreateMessageState \n")
-        app.schedule.working_time_check()
         app.message = app.message_creator.create_message()
 
-        # Connect to the remote server
-        app.communication.connect()
-        app.logger.start_remote_logging()
+        # Connect to the remote server if connected already
+        if not app.communication.is_connected():
+            app.communication.connect()
+            app.logger.start_remote_logging()
+
         app.set_state(ConfigCheckState())
 
 
@@ -146,7 +147,7 @@ class ConfigCheckState(State):
     @Context.log_and_save_execution_time(operation_name="ConfigCheckState handle")
     def handle(self, app: Context) -> None:
         logging.info("In ConfigCheckState \n")
-        # app.communication.wait_for_config(app.config.uuid, UUID_TOPIC)
+        app.communication.wait_for_config(app.config.uuid, UUID_TOPIC)
         app.set_state(TransmitState())
 
 
@@ -171,7 +172,7 @@ class ShutDownState(State):
         should_we_shut_down = app.schedule.should_shutdown(desired_shutdown_duration)
 
         if should_we_shut_down:
-
+            pass
         else:
             app.set_state(CreateMessageState())
 
