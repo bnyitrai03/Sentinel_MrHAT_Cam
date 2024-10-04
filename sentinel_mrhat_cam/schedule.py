@@ -12,12 +12,13 @@ class Schedule:
         pass
 
     def calculate_shutdown_duration(self, app_run_time: float) -> float:
-        pass
+        shutdown_duration = app_run_time - TIME_TO_BOOT_AND_SHUTDOWN
+        return max(shutdown_duration, 0)
 
     def get_wake_time(self, time_spent_shutdown: float) -> datetime:
         pass
 
-    def should_shutdown(self, desired_shutdown_dutarion: float) -> bool:
+    def should_shutdown(self, desired_shutdown_duration: float) -> bool:
         pass
 
     def shutdown(self, waiting_time: float, current_time: datetime) -> None:

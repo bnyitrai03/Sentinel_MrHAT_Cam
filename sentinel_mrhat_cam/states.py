@@ -168,8 +168,10 @@ class ShutDownState(State):
         # This wouldnt work if it were in the TransmitState, because the runtime variable is only updated after the function has ran,
         # so this needs to be in shutdown state
         desired_shutdown_duration = app.schedule.calculate_shutdown_duration(Context.runtime)
-        if app.schedule.should_shutdown(desired_shutdown_duration):
-            app.set_state(ShutDownState())
+        should_we_shut_down = app.schedule.should_shutdown(desired_shutdown_duration)
+
+        if should_we_shut_down:
+
         else:
             app.set_state(CreateMessageState())
 
