@@ -39,6 +39,14 @@ class ICommunication(ABC):
     def wait_for_config(self, message: str, topic: str) -> None:
         pass
 
+    @abstractmethod
+    def init_receive(self) -> None:
+        pass
+
+    @abstractmethod
+    def send_log(self, topic: str, message: str) -> None:
+        pass
+
 
 class MQTT(ICommunication):
     """
@@ -200,7 +208,7 @@ class MQTT(ICommunication):
         except Exception:
             exit(1)
 
-    def _init_receive(self) -> None:
+    def init_receive(self) -> None:
         """
         Initializes the MQTT client to receive the config file.
 
@@ -215,13 +223,24 @@ class MQTT(ICommunication):
             from .app_config import Config
 
             # Debugging
-            logging.info(f"Received message: {message.payload.decode()}")
+            receive_time = time.time()
+            formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(receive_time))
+
+            print(
+                f"Received message: {message.payload.decode()}, at {formatted_time}")
 
             try:
                 # If they dont want to send a new config, just send a config-ok,
                 # and we will proceed without changing the configuration
                 if message.payload.decode() == "config-ok":
+                    print("About to set event")
                     self.config_received_event.set()
+                    print("Event has been set")
+                    set_time = time.time()
+                    formatted_set_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(set_time))
+                    delay = set_time - receive_time
+                    print(f"Event set at {formatted_set_time}, delay: {delay:.6f}")
+
                     return
 
                 # Parse the JSON message
@@ -234,7 +253,7 @@ class MQTT(ICommunication):
 
                 # Copy the file
                 shutil.copyfile(TEMP_CONFIG_PATH, CONFIG_PATH)
-                logging.info(f"Config saved to {CONFIG_PATH}")
+                print(f"Config saved to {CONFIG_PATH}")
                 self.config_confirm_message = "config-ok"
 
             except json.JSONDecodeError as e:
@@ -248,9 +267,6 @@ class MQTT(ICommunication):
 
         self.client.on_message = on_message
         self.client.subscribe(self._subtopic)
-
-        # Debugging
-        logging.info(f"Subscribed to topic: {self._subtopic}")
 
     def is_connected(self) -> bool:
         return self.client.is_connected() if self.client else False
@@ -279,15 +295,23 @@ class MQTT(ICommunication):
         to ensure that all communication is logged appropriately.
         """
 
-        logging.info("Entering send method")
-        if not self.is_connected():
+        # print("Entering send method")
+        """ if not self.is_connected():
             print("Not connected, attempting to connect")
             self.connect()
         else:
-            print("Already connected, proceeding with publish")
+            print("Already connected, proceeding with publish") """
 
         self._publish(message, topic)
-        print("Message published")
+        # print("Message published")
+
+    def send_log(self, topic: str, message: str) -> None:
+        """
+        Sends the log message over MQTT without logging its own activity.
+        """
+        if not self.is_connected():
+            self.connect()
+        self._publish(topic, message)
 
     def connect(self) -> None:
         """
@@ -305,7 +329,7 @@ class MQTT(ICommunication):
 
             def on_connect(client: Any, userdata: Any, flags: Any, reason_code: Any, properties: Any) -> None:
                 if reason_code == 0:
-                    logging.info("Connected to MQTT Broker!")
+                    print("Connected to MQTT Broker!")
                 else:
                     logging.error(f"Failed to connect, return code {reason_code}")
 
@@ -320,9 +344,6 @@ class MQTT(ICommunication):
             # Resetting the counter after a successful connection
             self.broker_connect_counter = 0
             self.client.loop_start()
-
-            # Subscribe to the topic and start listening
-            self._init_receive()
 
         except Exception as e:
             logging.error(f"Error connecting to MQTT broker: {e}")
@@ -339,10 +360,14 @@ class MQTT(ICommunication):
             self.client.disconnect()
 
     def wait_for_config(self, uuid: str, topic: str) -> None:
-        try:
-            self.config_received_event.clear()
-            self.send(uuid, topic)
-            self.config_received_event.wait(timeout=5)
+        print(f"Waiting for config on topic {topic}")
+        self.config_received_event.clear()
+        start_time = time.time()
+        self.send(uuid, topic)
 
-        except TimeoutError as e:
-            logging.error(f"Timeout error: {e}")
+        if self.config_received_event.wait(timeout=10):
+            end_time = time.time()
+            print(f"Config received after {end_time - start_time:.3f} seconds")
+            return
+        else:
+            print("\nTimeout waiting for config\n")

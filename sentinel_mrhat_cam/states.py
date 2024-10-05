@@ -115,7 +115,7 @@ class InitState(State):
     @Context.log_and_save_execution_time(operation_name="InitState")
     def handle(self, app: Context) -> None:
         logging.info("In InitState \n")
-        # app.camera.start()
+        app.camera.start()
         app.set_state(CreateMessageState())
 
 
@@ -127,8 +127,10 @@ class CreateMessageState(State):
 
         # Connect to the remote server if not connected already
         if not app.communication.is_connected():
+            print("Starting remote logging in CreateMessageState")
             app.communication.connect()
-            app.logger.start_remote_logging()
+            app.communication.init_receive()
+            app.logger.start_remote_logging(app.communication)
 
         app.set_state(ConfigCheckState())
 
@@ -137,13 +139,18 @@ class ConfigCheckState(State):
     @Context.log_and_save_execution_time(operation_name="ConfigCheckState")
     def handle(self, app: Context) -> None:
         logging.info("In ConfigCheckState \n")
+        logging.info("Entering ConfigCheckState")
+        start_time = time.time()
         app.communication.wait_for_config(app.config.uuid, UUID_TOPIC)
+        end_time = time.time()
+        logging.info(f"Exiting ConfigCheckState after {end_time - start_time:.3f} seconds")
+        app.set_state(TransmitState())
 
         # check if the Pi is not within working hours
-        if app.schedule.should_shutdown(app.config.active["start"], app.config.active["end"]):
-            app.set_state(ShutdownState())
-        else:
-            app.set_state(TransmitState())
+        # if app.schedule.should_shutdown(app.config.active["start"], app.config.active["end"]):
+        #    app.set_state(ShutdownState())
+        # else:
+        app.set_state(TransmitState())
 
 
 class TransmitState(State):
@@ -157,12 +164,16 @@ class TransmitState(State):
 class ShutdownState(State):
     def handle(self, app: Context) -> None:
         logging.info("In ShutDownState")
+
+        # Debug
+        app.set_state(CreateMessageState())
+
         # Keep this during development
         logging.info(f"Accumulated runtime: {app.runtime}")
 
-        period: int = app.config.active["period"]  # period of the message sending
-        waiting_time: float = max(period - app.runtime, 0)  # time to wait in between the new message creation
-        self._shutdown_mode(period, waiting_time)
+        # period: int = app.config.active["period"]  # period of the message sending
+        # waiting_time: float = max(period - app.runtime, 0)  # time to wait in between the new message creation
+        # self._shutdown_mode(period, waiting_time)
 
     def _shutdown_mode(self, app: Context, period: int, waiting_time: float) -> None:
         # If the period is negative then we must wake up at the end of this time interval
