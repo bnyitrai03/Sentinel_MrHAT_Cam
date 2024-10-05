@@ -26,40 +26,13 @@ class Context:
     runtime: float = 0.0  # static varibale to measure the accumulated runtime of the application
 
     def __init__(self, logger: Logger):
-        config = {
-            "uuid": "8D8AC610-566D-4EF0-9C22-186B2A5ED793",
-            "quality": "4K",
-            "timing": [
-                {
-                    "period": -1,
-                    "start": "00:00:00",
-                    "end": "07:00:00"
-                },
-                {
-                    "period": 30,
-                    "start": "07:00:00",
-                    "end": "12:00:00"
-                },
-                {
-                    "period": -1,
-                    "start": "12:00:00",
-                    "end": "15:00:00"
-                },
-                {
-                    "period": 30,
-                    "start": "15:00:00",
-                    "end": "19:00:00"
-                },
-                {
-                    "period": -1,
-                    "start": "19:00:00",
-                    "end": "23:59:59"
-                }
-            ]
-        }
         self._state: State = InitState()
         self.config: Config = Config()
-        self.camera: ICamera = Camera(config)
+        # Validating configuration
+        self.config.load()
+        self.config.get_active_config()
+
+        self.camera: ICamera = Camera(self.config.active)
         self.communication: ICommunication = MQTT()
         self.rtc: IRTC = RTC()
         self.system: ISystem = System()
@@ -144,13 +117,18 @@ class ConfigCheckState(State):
         app.communication.wait_for_config(app.config.uuid, UUID_TOPIC)
         end_time = time.time()
         logging.info(f"Exiting ConfigCheckState after {end_time - start_time:.3f} seconds")
+
+        # Validating configuration
+        app.config.load()
+        app.config.get_active_config()
+        logging.info(f"Active config: {app.config.active}")
+
         app.set_state(TransmitState())
 
         # check if the Pi is not within working hours
         # if app.schedule.should_shutdown(app.config.active["start"], app.config.active["end"]):
         #    app.set_state(ShutdownState())
         # else:
-        app.set_state(TransmitState())
 
 
 class TransmitState(State):

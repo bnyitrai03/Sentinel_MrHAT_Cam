@@ -25,26 +25,27 @@ class Camera(ICamera):
     def __init__(self, config: dict[str, str]) -> None:
         self._quality = 95
         self._cam = Picamera2()
+        self._config = config
 
         # Set the premade settings
-        if config["quality"] == "4K":
+        if self._config["quality"] == "4K":
             self._width = 3840
             self._height = 2160
-        elif config["quality"] == "3K":
+        elif self._config["quality"] == "3K":
             self._width = 2560
             self._height = 1440
-        elif config["quality"] == "HD":
+        elif self._config["quality"] == "HD":
             self._width = 1920
             self._height = 1080
         # If the specified quality is not found, default to 3K quality
         else:
             self._width = 2560
             self._height = 1440
-            logging.error(f"Invalid quality specified: {config['quality']}. Defaulting to 3K quality.")
+            logging.error(f"Invalid quality specified: {self._config['quality']}. Defaulting to 3K quality.")
         logging.info("Camera instance created")
 
         # Test logging
-        logging.info(f"Config quality: {config['quality']}")
+        logging.info(f"Config quality: {self._config['quality']}")
 
     def start(self) -> None:
         """
@@ -80,3 +81,6 @@ class Camera(ICamera):
             logging.error(f"Error during image capture: {e}")
             return None
         return image
+
+    def update_configuration(self, config: dict[str, str]) -> None:
+        self._config = config
