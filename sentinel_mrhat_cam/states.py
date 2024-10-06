@@ -27,17 +27,16 @@ class Context:
 
     def __init__(self, logger: Logger):
         self._state: State = InitState()
-        # self.config: Config = Config()
-
-        # self.camera: ICamera = Camera(self.config.active)
         self.communication: ICommunication = MQTT()
         self.rtc: IRTC = RTC()
+        self.config: Config = Config(self.rtc, self.communication)
+        self.camera: ICamera = Camera(self.config.active)  # !!!!!!!!
         self.system: ISystem = System()
         self.schedule: Schedule = Schedule()
 
         # self.message_creator: MessageCreator = MessageCreator(self.system, self.rtc, self.camera)
         self.logger = logger
-        self.message: str = None
+        self.message: str = "Uninitialized message"
 
     def request(self) -> None:
         self._state.handle(self)
@@ -85,7 +84,7 @@ class InitState(State):
     @Context.log_and_save_execution_time(operation_name="InitState")
     def handle(self, app: Context) -> None:
         logging.info("In InitState")
-        # app.camera.start()
+        # app.camera.start()  # ha jött egy új config akkor elvileg innen kéne indulni?
         app.set_state(CreateMessageState())
 
 
@@ -101,7 +100,6 @@ class CreateMessageState(State):
             app.communication.init_receive()
             app.logger.start_remote_logging(app.communication)
 
-        time.sleep(0.1)
         app.set_state(ConfigCheckState())
 
 
@@ -111,15 +109,11 @@ class ConfigCheckState(State):
         logging.info("In ConfigCheckState")
 
         start_time = time.time()
-        app.communication.wait_for_config(app.config.uuid, UUID_TOPIC)
+        app.communication.wait_for_config(app.config.active["uuid"], UUID_TOPIC)
         end_time = time.time()
         logging.info(f"Exiting ConfigCheckState after {end_time - start_time:.3f} seconds")
 
-        # Validating configuration
-        app.config.load()
-        app.config.get_active_config()
         logging.info(f"Active config: {app.config.active}")
-
         app.set_state(TransmitState())
 
         # check if the Pi is not within working hours

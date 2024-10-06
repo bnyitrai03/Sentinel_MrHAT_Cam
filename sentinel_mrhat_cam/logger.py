@@ -26,7 +26,6 @@ class Logger(logging.Handler):
         try:
             msg = self.format(record)
             self._log_queue.put(msg)
-            print(f"Messages in queue: {self._log_queue.qsize()}")  # Remove
             if self._start_event.is_set():
                 self.publish_loop(LOGGING_TOPIC)
         except Exception as e:
@@ -56,10 +55,8 @@ class Logger(logging.Handler):
                 # Do not publish if not connected
                 if self._remote.is_connected():
                     msg: str = self._log_queue.get(timeout=1)
-                    print(f"Removed a msg from queue: {self._log_queue.qsize()}")  # Remove
                     self._remote.send(msg, topic)
                 else:
-                    print("Not connected")  # Remove
                     return
 
             except Empty:

@@ -313,14 +313,14 @@ class MQTT(ICommunication):
             self.client.disconnect()
 
     def wait_for_config(self, uuid: str, topic: str) -> None:
-        print(f"Waiting for config on topic {topic}")
+        logging.info(f"Waiting for config on topic {topic}")
         self.config_received_event.clear()
         start_time = time.time()
         self.send(uuid, topic)
 
         if self.config_received_event.wait(timeout=10):
             end_time = time.time()
-            print(f"Config received after {end_time - start_time:.3f} seconds")
+            logging.info(f"Config received after {end_time - start_time:.3f} seconds")
             return
         else:
-            print("\nTimeout waiting for config\n")
+            logging.error("Timeout waiting for config\n")
