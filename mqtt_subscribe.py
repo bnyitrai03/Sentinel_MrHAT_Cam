@@ -31,7 +31,6 @@ def connect_mqtt() -> mqtt_client.Client:
             print(f"Failed to connect, return code {rc}")
 
     client = mqtt_client.Client(mqtt_client.CallbackAPIVersion.VERSION2)
-    client.username_pw_set("er-edge-3c547181", "admin")
     client.enable_logger()
     client.on_connect = on_connect
     client.connect(broker, port)

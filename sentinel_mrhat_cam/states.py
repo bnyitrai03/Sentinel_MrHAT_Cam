@@ -27,18 +27,15 @@ class Context:
 
     def __init__(self, logger: Logger):
         self._state: State = InitState()
-        self.config: Config = Config()
-        # Validating configuration
-        self.config.load()
-        self.config.get_active_config()
+        # self.config: Config = Config()
 
-        self.camera: ICamera = Camera(self.config.active)
+        # self.camera: ICamera = Camera(self.config.active)
         self.communication: ICommunication = MQTT()
         self.rtc: IRTC = RTC()
         self.system: ISystem = System()
         self.schedule: Schedule = Schedule()
 
-        self.message_creator: MessageCreator = MessageCreator(self.system, self.rtc, self.camera)
+        # self.message_creator: MessageCreator = MessageCreator(self.system, self.rtc, self.camera)
         self.logger = logger
         self.message: str = None
 
@@ -87,32 +84,32 @@ class Context:
 class InitState(State):
     @Context.log_and_save_execution_time(operation_name="InitState")
     def handle(self, app: Context) -> None:
-        logging.info("In InitState \n")
-        app.camera.start()
+        logging.info("In InitState")
+        # app.camera.start()
         app.set_state(CreateMessageState())
 
 
 class CreateMessageState(State):
     @Context.log_and_save_execution_time(operation_name="CreateMessageState")
     def handle(self, app: Context) -> None:
-        logging.info("In CreateMessageState \n")
-        app.message = app.message_creator.create_message()
+        logging.info("In CreateMessageState")
+        # app.message = app.message_creator.create_message()
 
         # Connect to the remote server if not connected already
         if not app.communication.is_connected():
-            print("Starting remote logging in CreateMessageState")
             app.communication.connect()
             app.communication.init_receive()
             app.logger.start_remote_logging(app.communication)
 
+        time.sleep(0.1)
         app.set_state(ConfigCheckState())
 
 
 class ConfigCheckState(State):
     @Context.log_and_save_execution_time(operation_name="ConfigCheckState")
     def handle(self, app: Context) -> None:
-        logging.info("In ConfigCheckState \n")
-        logging.info("Entering ConfigCheckState")
+        logging.info("In ConfigCheckState")
+
         start_time = time.time()
         app.communication.wait_for_config(app.config.uuid, UUID_TOPIC)
         end_time = time.time()
@@ -172,6 +169,6 @@ class ShutdownState(State):
             app.set_state(CreateMessageState())
 
     def _shutdown(self, app: Context, wake_time: Union[str, int, float]) -> None:
+        app.logger.stop_remote_logging()
         app.communication.disconnect()
-        app.logger.disconnect_remote_logging()
         app.system.schedule_wakeup(wake_time)

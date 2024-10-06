@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import Dict, Any
 import logging
 import json
 from datetime import datetime
@@ -17,7 +17,8 @@ class Config:
     def check_for_new_config(self) -> None:
         pass
 
-    def get_default_config(self) -> Dict[str, Any]:
+    @staticmethod
+    def get_default_config() -> Dict[str, Any]:
         """
         Defines and returns a default configuration dictionary.
 

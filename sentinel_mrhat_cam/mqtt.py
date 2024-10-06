@@ -43,10 +43,6 @@ class ICommunication(ABC):
     def init_receive(self) -> None:
         pass
 
-    @abstractmethod
-    def send_log(self, topic: str, message: str) -> None:
-        pass
-
 
 class MQTT(ICommunication):
     """
@@ -172,42 +168,6 @@ class MQTT(ICommunication):
             logging.error(f"Error during creating connection: {e}")
             exit(1)
 
-    def _publish(self, message: str, topic: str) -> None:
-        """
-        Publishes a message to a specified MQTT topic.
-
-        This method sends a message to the MQTT broker to be published on a specified topic.
-        It uses the MQTT client to publish the message with QoS = 2.
-        The method waits for the message (max 5 seconds) to be published and handles any errors that might occur during
-        the publishing process.
-
-        Parameters:
-        ----------
-        message : str
-            The payload to be published to the MQTT topic.
-
-        topic : str
-            The topic string to which the message should be published.
-
-        Methods:
-        -------
-        client.publish(topic, message, qos) -> MQTTMessageInfo:
-            Sends a message to the broker on the specified topic.
-
-        msg_info.wait_for_publish(timeout) -> None:
-            Blocks until the message publishing is acknowledged or the 5 second time limit is met.
-
-        Raises:
-        -------
-        SystemExit:
-            Exits the script if an error occurs during the publishing process.
-        """
-        try:
-            msg_info = self.client.publish(topic, message, qos=self._qos)
-            msg_info.wait_for_publish(timeout=5)
-        except Exception:
-            exit(1)
-
     def init_receive(self) -> None:
         """
         Initializes the MQTT client to receive the config file.
@@ -269,49 +229,44 @@ class MQTT(ICommunication):
         self.client.subscribe(self._subtopic)
 
     def is_connected(self) -> bool:
-        return self.client.is_connected() if self.client else False
+        return self.client.is_connected()
 
     def send(self, message: str, topic: str) -> None:
         """
-        Sends the message over MQTT.
+        Publishes a message to a specified MQTT topic.
 
-        This method orchestrates the entire process of capturing an image, gathering
-        system data, creating a message, and transmitting it to a predefined MQTT topic.
-        If the MQTT client is not already connected, the method attempts to establish
-        the connection in a blocking manner to ensure the message is sent successfully.
+        This method sends a message to the MQTT broker to be published on a specified topic.
+        It uses the MQTT client to publish the message with QoS = 2.
+        The method waits for the message (max 5 seconds) to be published and handles any errors that might occur during
+        the publishing process.
 
-        Raises
-        ------
-        Exception
-            If any error occurs during the process, whether it be in capturing the image,
-            creating the message, or transmitting it via MQTT. The exception is logged,
-            and the error is re-raised.
+        Parameters:
+        ----------
+        message : str
+            The payload to be published to the MQTT topic.
 
-        Notes
-        -----
-        - The method ensures that the MQTT client is connected before attempting to
-        publish the message.
-        - If MQTT logging is not already initialized, the method triggers its start
-        to ensure that all communication is logged appropriately.
+        topic : str
+            The topic string to which the message should be published.
+
+        Methods:
+        -------
+        client.publish(topic, message, qos) -> MQTTMessageInfo:
+            Sends a message to the broker on the specified topic.
+
+        msg_info.wait_for_publish(timeout) -> None:
+            Blocks until the message publishing is acknowledged or the 5 second time limit is met.
+
+        Raises:
+        -------
+        SystemExit:
+            Exits the script if an error occurs during the publishing process.
         """
-
-        # print("Entering send method")
-        """ if not self.is_connected():
-            print("Not connected, attempting to connect")
-            self.connect()
-        else:
-            print("Already connected, proceeding with publish") """
-
-        self._publish(message, topic)
-        # print("Message published")
-
-    def send_log(self, topic: str, message: str) -> None:
-        """
-        Sends the log message over MQTT without logging its own activity.
-        """
-        if not self.is_connected():
-            self.connect()
-        self._publish(topic, message)
+        try:
+            self.client.publish(topic, message, qos=self._qos)
+            # msg_info.wait_for_publish(timeout=5)
+        except Exception:
+            print("Failed to publish")
+            exit(1)
 
     def connect(self) -> None:
         """
@@ -326,16 +281,14 @@ class MQTT(ICommunication):
             The connected MQTT client instance.
         """
         try:
-
             def on_connect(client: Any, userdata: Any, flags: Any, reason_code: Any, properties: Any) -> None:
                 if reason_code == 0:
-                    print("Connected to MQTT Broker!")
+                    logging.info("Connected to MQTT Broker!")
                 else:
                     logging.error(f"Failed to connect, return code {reason_code}")
 
             # checking the connection to the broker in a blocking way
             self._broker_check()
-
             self.client.on_connect = on_connect
             self.client.username_pw_set(USERNAME, PASSWORD)
             self.client.disable_logger()
