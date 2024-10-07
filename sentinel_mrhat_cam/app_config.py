@@ -1,10 +1,11 @@
-from typing import Dict, Any
+from typing import Dict, Any, List
 import logging
 import json
 from datetime import datetime
-from .static_config import CONFIG_PATH, CONFIGACK_TOPIC
+from .static_config import CONFIG_PATH, CONFIGACK_TOPIC, MINIMUM_WAIT_TIME, MAXIMUM_WAIT_TIME
 from .rtc import IRTC
 from .mqtt import ICommunication
+import re
 
 
 class Config:
@@ -18,8 +19,10 @@ class Config:
 
         Parameters
         ----------
-        path : str
-            Path to the configuration file.
+        rtc : IRTC
+            An instance of the RTC interface.
+        mqtt : ICommunication
+            An instance of the MQTT communication interface.
         """
         self._path: str = CONFIG_PATH
         self._rtc: IRTC = rtc
@@ -96,10 +99,6 @@ class Config:
         If any errors occur during the loading process, appropriate error messages are
         logged, and the function raises the encountered exception.
 
-        Parameters
-        ----------
-        None
-
         Raises
         ------
         json.JSONDecodeError
@@ -113,7 +112,7 @@ class Config:
             with open(self._path, "r") as file:
                 new_config: dict = json.load(file)
 
-            self.validate_config(new_config)
+            Config.validate_config(new_config)
 
             self._data.update(new_config)
             self._set_active_config()
@@ -132,10 +131,6 @@ class Config:
     def _set_active_config(self) -> None:
         """
         Generate an active configuration based on the current time from RTC.
-        Returns
-        -------
-        dict
-            The active configuration with the current timing period at the top level.
         """
         current_time_str = self._rtc.get_time()
         current_time = datetime.strptime(current_time_str, "%H:%M:%S").time()
@@ -159,11 +154,165 @@ class Config:
 
         self.active = active_config
 
-    def validate_config(self, new_config) -> None:
-        pass
+    @staticmethod
+    def validate_config(new_config: Dict[str, Any]) -> None:
+        """
+        Validates the new configuration dictionary against the expected structure and rules.
 
-    def _validate_period(self, period) -> None:
-        pass
+        Parameters
+        ----------
+        new_config : dict
+            The configuration dictionary to be validated.
 
-    def _validate_time_format(self, new_config) -> None:
-        pass
+        Raises
+        ------
+        TypeError
+            If the configuration is not a dictionary, or if any value types are incorrect.
+        ValueError
+            If the configuration structure is invalid, or if any values are out of allowed ranges.
+        """
+        if not isinstance(new_config, dict):
+            raise TypeError("Config loaded from file is not a dictionary.")
+
+        expected_keys = {"uuid", "quality", "timing"}
+        if set(new_config.keys()) != expected_keys:
+            raise ValueError("Config keys do not match expected structure.")
+
+        Config._validate_uuid(new_config["uuid"])
+        Config._validate_quality(new_config["quality"])
+        Config._validate_timing(new_config["timing"])
+
+    @staticmethod
+    def _validate_uuid(uuid: str) -> None:
+        """
+        Validates the UUID in the configuration using a regular expression.
+
+        Parameters
+        ----------
+        uuid : str
+            The UUID to be validated.
+
+        Raises
+        ------
+        ValueError
+            If the UUID is invalid.
+        """
+        uuid_pattern = re.compile(
+            r'^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$', re.IGNORECASE)
+        if not uuid_pattern.match(uuid):
+            raise ValueError("Invalid UUID format in the config.")
+
+    @staticmethod
+    def _validate_quality(quality: str) -> None:
+        """
+        Validates the quality setting in the configuration.
+
+        Parameters
+        ----------
+        quality : str
+            The quality setting to be validated.
+
+        Raises
+        ------
+        ValueError
+            If the quality setting is invalid.
+        """
+        if quality not in ["4K", "3K", "HD"]:
+            raise ValueError("Invalid quality specified in the config.")
+
+    @staticmethod
+    def _validate_timing(timing: List[Dict[str, Any]]) -> None:
+        """
+        Validates the timing settings in the configuration.
+
+        Parameters
+        ----------
+        timing : List[Dict[str, Any]]
+            The list of timing dictionaries to be validated.
+
+        Raises
+        ------
+        ValueError
+            If the timing settings are invalid.
+        TypeError
+            If the timing settings have incorrect types.
+        """
+        if not isinstance(timing, list):
+            raise TypeError("Timing must be a list of dictionaries.")
+
+        # Go over each item in the timing key-value pairs
+        for interval in timing:
+            if not isinstance(interval, dict):
+                raise TypeError("Each timing interval must be a dictionary.")
+
+            required_keys = {"period", "start", "end"}
+            if set(interval.keys()) != required_keys:
+                raise ValueError("Invalid keys in timing interval.")
+
+            Config._validate_period(interval["period"])
+            Config._validate_time_format(interval["start"])
+            Config._validate_time_format(interval["end"])
+
+            if interval["start"] >= interval["end"]:
+                raise ValueError("Start time must be before end time in each interval.")
+
+        # Check if intervals cover full day without overlap
+        # Sort intervals by start time
+        sorted_intervals = sorted(timing, key=lambda i: i["start"])
+
+        # Iterate through sorted intervals
+        # enumerate is used to get both the index and value in each iteration
+        # This allows us to easily check the first (i == 0) and last (i == len(sorted_intervals) - 1) intervals,
+        # as well as compare each interval with the next one (sorted_intervals[i+1])
+        for i, interval in enumerate(sorted_intervals):
+            if i == 0 and interval["start"] != "00:00:00":
+                raise ValueError("First interval must start at 00:00:00")
+
+            if i == len(sorted_intervals) - 1 and interval["end"] != "23:59:59":
+                raise ValueError("Last interval must end at 23:59:59")
+
+            # Check if current interval ends where next interval starts
+            if i < len(sorted_intervals) - 1:
+                if interval["end"] != sorted_intervals[i+1]["start"]:
+                    raise ValueError("Intervals must be contiguous")
+
+    @staticmethod
+    def _validate_period(period: int) -> None:
+        """
+        Validates the period value in the configuration.
+
+        Parameters
+        ----------
+        period : int
+            The time period to be validated.
+
+        Raises
+        ------
+        TypeError
+            If the period is not an integer.
+        ValueError
+            If the period is invalid (not -1 and not within allowed range).
+        """
+        if not isinstance(period, int):
+            raise TypeError("Period must be an integer.")
+        if period != -1 and (period < MINIMUM_WAIT_TIME or period > MAXIMUM_WAIT_TIME):
+            raise ValueError(f"Period must be -1 or between {MINIMUM_WAIT_TIME} and {MAXIMUM_WAIT_TIME}.")
+
+    @staticmethod
+    def _validate_time_format(time: str) -> None:
+        """
+        Validates the time format in the configuration.
+
+        Parameters
+        ----------
+        time : str
+            The time string to be validated.
+
+        Raises
+        ------
+        ValueError
+            If the time format is invalid.
+        """
+        time_pattern = re.compile(r'^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$')
+        if not time_pattern.match(time):
+            raise ValueError(f"Invalid time format: {time}. Expected format: HH:MM:SS")

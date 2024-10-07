@@ -84,7 +84,8 @@ class InitState(State):
     @Context.log_and_save_execution_time(operation_name="InitState")
     def handle(self, app: Context) -> None:
         logging.info("In InitState")
-        # app.camera.start()  # ha jött egy új config akkor elvileg innen kéne indulni?
+        # app.camera(app.config.active) akkor már egy ilyen is kell elés
+        app.camera.start()  # ha jött egy új config akkor elvileg innen kéne indulni?
         app.set_state(CreateMessageState())
 
 
@@ -92,7 +93,7 @@ class CreateMessageState(State):
     @Context.log_and_save_execution_time(operation_name="CreateMessageState")
     def handle(self, app: Context) -> None:
         logging.info("In CreateMessageState")
-        # app.message = app.message_creator.create_message()
+        app.message = app.message_creator.create_message()
 
         # Connect to the remote server if not connected already
         if not app.communication.is_connected():
@@ -108,13 +109,19 @@ class ConfigCheckState(State):
     def handle(self, app: Context) -> None:
         logging.info("In ConfigCheckState")
 
-        start_time = time.time()
-        app.communication.wait_for_config(app.config.active["uuid"], UUID_TOPIC)
-        end_time = time.time()
-        logging.info(f"Exiting ConfigCheckState after {end_time - start_time:.3f} seconds")
+        self.wait_for_config()
+        self.load()
 
         logging.info(f"Active config: {app.config.active}")
         app.set_state(TransmitState())
+
+    @Context.log_and_save_execution_time(operation_name="ConfigLoad")
+    def load(self, app: Context) -> None:
+        app.config.load()
+
+    @Context.log_and_save_execution_time(operation_name="ConfigAcknowledge")
+    def wait_for_config(self, app: Context) -> None:
+        app.communication.wait_for_config(app.config.active["uuid"], UUID_TOPIC)
 
         # check if the Pi is not within working hours
         # if app.schedule.should_shutdown(app.config.active["start"], app.config.active["end"]):
