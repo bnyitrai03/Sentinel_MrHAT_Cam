@@ -8,7 +8,7 @@ from .mqtt import ICommunication
 
 
 class Config:
-    def __init__(self, rtc: IRTC, mqtt: ICommunication):
+    def __init__(self, mqtt: ICommunication):
         """
         Initializes the Config class with the given file path.
 
@@ -22,7 +22,6 @@ class Config:
             Path to the configuration file.
         """
         self._path: str = CONFIG_PATH
-        self._rtc: IRTC = rtc
         self._data: dict[str, Any] = {}
         self.active: dict[str, Any] = {}
         try:
@@ -137,7 +136,7 @@ class Config:
         dict
             The active configuration with the current timing period at the top level.
         """
-        current_time_str = self._rtc.get_time()
+        current_time_str = IRTC.get_time()
         current_time = datetime.strptime(current_time_str, "%H:%M:%S").time()
 
         active_config = {

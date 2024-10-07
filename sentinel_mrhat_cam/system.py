@@ -10,17 +10,20 @@ except ImportError:
 
 
 class ISystem(ABC):
+    @staticmethod
     @abstractmethod
-    def get_hardware_info(self) -> Optional[Dict[str, Any]]:
+    def get_hardware_info() -> Optional[Dict[str, Any]]:
         pass
 
+    @staticmethod
     @abstractmethod
-    def schedule_wakeup(self, wake_time: Union[str, int, float]) -> None:
+    def schedule_wakeup(wake_time: Union[str, int, float]) -> None:
         pass
 
 
 class System(ISystem):
-    def _get_battery_info(self) -> Dict[str, Any]:
+    @staticmethod
+    def _get_battery_info() -> Dict[str, Any]:
         battery_result = subprocess.run(
             ['cat', '/sys/class/power_supply/bq2562x-battery/uevent'], stdout=subprocess.PIPE, check=True
         )
@@ -40,7 +43,8 @@ class System(ISystem):
 
         return battery_data
 
-    def _get_charger_info(self) -> Dict[str, Any]:
+    @staticmethod
+    def _get_charger_info() -> Dict[str, Any]:
         charger_result = subprocess.run(
             ['cat', '/sys/class/power_supply/bq2562x-charger/uevent'], stdout=subprocess.PIPE, check=True
         )
@@ -50,16 +54,17 @@ class System(ISystem):
 
         return charger_data
 
-    def _get_cpu_temperature(self) -> float:
+    @staticmethod
+    def _get_cpu_temperature() -> float:
         cpu_temp = CPUTemperature()
-
         return cpu_temp.temperature
 
-    def get_hardware_info(self) -> Optional[Dict[str, Any]]:
+    @staticmethod
+    def get_hardware_info() -> Optional[Dict[str, Any]]:
         try:
-            battery_data = self._get_battery_info()
-            charger_data = self._get_charger_info()
-            cpu_temp = self._get_cpu_temperature()
+            battery_data = System._get_battery_info()
+            charger_data = System._get_charger_info()
+            cpu_temp = System._get_cpu_temperature()
 
         except subprocess.CalledProcessError as e:
             logging.error(f"Failed to gather hardware info: {e}")
@@ -80,5 +85,33 @@ class System(ISystem):
 
         return log_data
 
-    def schedule_wakeup(self, wake_time: Union[str, int, float]) -> None:
-        pass
+    @staticmethod
+    def schedule_wakeup(wake_time: Union[str, int, float]) -> None:
+        """
+        Schedule a system wake-up at a specified time.
+
+        Parameters
+        ----------
+        wake_time : str, int, float
+            The time at which the system should wake up.
+
+        Raises
+        ------
+        subprocess.CalledProcessError
+            If the rtcwake command fails to execute.
+        """
+        try:
+            if isinstance(wake_time, str):
+                cmd = f"sudo mrhat-rtcwake -d rtc0 -t $(date +%s -d 'today {wake_time}')"
+            elif isinstance(wake_time, (int, float)):
+                cmd = f"sudo mrhat-rtcwake -d rtc0 -s {str(wake_time)}"
+            else:
+                raise ValueError("wake_time must be a str, int, or float")
+
+            # Execute the command
+            subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True)
+
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Failed to set RTC wake-up alarm: {e}")
+            logging.error(f"rtcwake error output: {e.stderr}")
+            exit(1)

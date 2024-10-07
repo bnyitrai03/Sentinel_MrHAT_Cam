@@ -313,7 +313,6 @@ class MQTT(ICommunication):
             self.client.disconnect()
 
     def wait_for_config(self, uuid: str, topic: str) -> None:
-        logging.info(f"Waiting for config on topic {topic}")
         self.config_received_event.clear()
         start_time = time.time()
         self.send(uuid, topic)

@@ -11,10 +11,8 @@ import json
 
 
 class MessageCreator:
-    def __init__(self, system: ISystem, rtc: IRTC, camera: ICamera):
+    def __init__(self, camera: ICamera):
         self._camera = camera
-        self._rtc = rtc
-        self._system = system
 
     def _create_base64_image(self) -> str:
         """
@@ -117,8 +115,8 @@ class MessageCreator:
         - The function also logs additional hardware information to a separate file for further analysis.
         """
         try:
-            hardware_info = self._system.get_hardware_info()
-            timestamp = self._rtc.get_time()
+            hardware_info = ISystem.get_hardware_info()
+            timestamp = IRTC.get_time()
             image = self._create_base64_image()
 
             message: Dict[str, Any] = {

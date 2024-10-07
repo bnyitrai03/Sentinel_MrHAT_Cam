@@ -1,4 +1,5 @@
 from datetime import datetime
+import pytz
 import logging
 import re
 import time
@@ -8,8 +9,14 @@ import subprocess
 
 
 class IRTC(ABC):
+    @staticmethod
     @abstractmethod
-    def get_time(self) -> str:
+    def get_time() -> str:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def localize_time(time: str) -> str:
         pass
 
 
@@ -21,7 +28,8 @@ class RTC(IRTC):
     syncing the RTC with the system time, and retrieving the current time.
 
     """
-    def _extract_time(self, lines: List[str], target_string: str) -> datetime:
+    @staticmethod
+    def _extract_time(lines: List[str], target_string: str) -> datetime:
         """
         Extract the time in HH:MM:SS format from the line containing the target string.
 
@@ -42,7 +50,7 @@ class RTC(IRTC):
         Exception
             If the time cannot be extracted from the line.
         """
-        line = self._find_line(lines, target_string)
+        line = RTC._find_line(lines, target_string)
         # Define a regex pattern to match the time format HH:MM:SS
         pattern = r'(\d{2}:\d{2}:\d{2})'
         match = re.search(pattern, line)
@@ -52,7 +60,8 @@ class RTC(IRTC):
         else:
             raise Exception(f"Unable to extract time from line: {line}")
 
-    def _find_line(self, lines: list[str], target_string: str) -> str:
+    @staticmethod
+    def _find_line(lines: list[str], target_string: str) -> str:
         """
         Find and return a specific line from `timedatectl` output.
 
@@ -86,7 +95,8 @@ class RTC(IRTC):
         found_line = next(line for line in lines if target_string in line)
         return found_line.split(': ', 1)[1].strip()
 
-    def _get_timedatectl(self) -> List[str]:
+    @staticmethod
+    def _get_timedatectl() -> List[str]:
         """
         Get output from the `timedatectl` command.
 
@@ -114,7 +124,8 @@ class RTC(IRTC):
             raise Exception(f"Error getting date from timedatectl: {result.stderr}")
         return result.stdout.splitlines()
 
-    def _sync_RTC_to_system(self) -> None:
+    @staticmethod
+    def _sync_RTC_to_system() -> None:
         """
         Synchronize the RTC to the system clock.
 
@@ -138,7 +149,8 @@ class RTC(IRTC):
         except subprocess.CalledProcessError:
             raise
 
-    def _sync_system_to_ntp(self, max_retries: int = 5, delay: int = 2) -> bool:
+    @staticmethod
+    def _sync_system_to_ntp(max_retries: int = 5, delay: int = 2) -> bool:
         """
         Synchronize the system clock to NTP server.
 
@@ -171,8 +183,8 @@ class RTC(IRTC):
         - If all retries fail, it logs an error message and exits the program.
         """
         for retry in range(max_retries):
-            lines = self._get_timedatectl()
-            is_synced = self._find_line(lines, "System clock synchronized:")
+            lines = RTC._get_timedatectl()
+            is_synced = RTC._find_line(lines, "System clock synchronized:")
             if is_synced == "yes":
                 return True
 
@@ -182,7 +194,18 @@ class RTC(IRTC):
         logging.error("Failed to sync system to NTP after maximum retries")
         exit(1)
 
-    def get_time(self) -> str:
+    @staticmethod
+    def localize_time(time: str) -> str:
+        # Get the current date and attach the input time to it to account for daylight saving time
+        today = datetime.now(pytz.utc).date()
+        utc_time = datetime.strptime(time, "%H:%M:%S").replace(tzinfo=pytz.utc).replace(year=today.year, month=today.month, day=today.day)
+        budapest_tz = pytz.timezone('Europe/Budapest')
+        # Convert the UTC time to Budapest time
+        local_time = utc_time.astimezone(budapest_tz)
+        return local_time.strftime("%H:%M:%S")
+
+    @staticmethod
+    def get_time() -> str:
         """
         Get the current time, ensuring synchronization with NTP and RTC.
 
@@ -207,18 +230,18 @@ class RTC(IRTC):
         """
         try:
             # Get all the lines from timedatectl output
-            lines = self._get_timedatectl()
+            lines = RTC._get_timedatectl()
 
-            rtc = self._extract_time(lines, "RTC time:")
-            utc = self._extract_time(lines, "Universal time:")
+            rtc = RTC._extract_time(lines, "RTC time:")
+            utc = RTC._extract_time(lines, "Universal time:")
 
             # If the RTC time is different from the system clock sync them
             if abs((utc - rtc).total_seconds()) > 2:
-                self._sync_system_to_ntp()
-                self._sync_RTC_to_system()
+                RTC._sync_system_to_ntp()
+                RTC._sync_RTC_to_system()
                 # ask for the time again
-                lines = self._get_timedatectl()
-                utc = self._extract_time(lines, "Universal time:")
+                lines = RTC._get_timedatectl()
+                utc = RTC._extract_time(lines, "Universal time:")
 
             return str(utc.strftime("%H:%M:%S"))
 
