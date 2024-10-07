@@ -102,14 +102,20 @@ class ConfigCheckState(State):
     def handle(self, app: Context) -> None:
         logging.info("In ConfigCheckState")
 
-        start_time = time.time()
-        app.communication.wait_for_config(app.config.active["uuid"], UUID_TOPIC)
-        end_time = time.time()
-        logging.info(f"Exiting ConfigCheckState after {end_time - start_time:.3f} seconds")
+        self.wait_for_config()
+        self.load()
 
         logging.info(f"Active config: {app.config.active}")
 
         app.set_state(TransmitState())
+
+    @Context.log_and_save_execution_time(operation_name="ConfigLoad")
+    def load(self, app: Context) -> None:
+        app.config.load()
+
+    @Context.log_and_save_execution_time(operation_name="ConfigAcknowledge")
+    def wait_for_config(self, app: Context) -> None:
+        app.communication.wait_for_config(app.config.active["uuid"], UUID_TOPIC)
 
 
 class TransmitState(State):
