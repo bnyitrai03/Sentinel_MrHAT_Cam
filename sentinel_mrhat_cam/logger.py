@@ -85,4 +85,5 @@ class Logger(logging.Handler):
 
     def stop_remote_logging(self) -> None:
         self._start_event.clear()
+        logging.getLogger().removeHandler(self)
         super().close()

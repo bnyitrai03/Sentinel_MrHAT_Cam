@@ -9,7 +9,7 @@ import re
 
 
 class Config:
-    def __init__(self, rtc: IRTC, mqtt: ICommunication):
+    def __init__(self, mqtt: ICommunication):
         """
         Initializes the Config class with the given file path.
 
@@ -25,7 +25,6 @@ class Config:
             An instance of the MQTT communication interface.
         """
         self._path: str = CONFIG_PATH
-        self._rtc: IRTC = rtc
         self._data: dict[str, Any] = {}
         self.active: dict[str, Any] = {}
         try:
@@ -132,7 +131,7 @@ class Config:
         """
         Generate an active configuration based on the current time from RTC.
         """
-        current_time_str = self._rtc.get_time()
+        current_time_str = IRTC.get_time()
         current_time = datetime.strptime(current_time_str, "%H:%M:%S").time()
 
         active_config = {
