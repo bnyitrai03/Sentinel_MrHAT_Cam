@@ -1,6 +1,6 @@
 import json
 from paho.mqtt import client as mqtt_client
-from sentinel_mrhat_cam import BROKER
+from sentinel_mrhat_cam import BROKER, CONFIGSUB_TOPIC
 
 broker = BROKER
 port = 1883

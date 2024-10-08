@@ -315,6 +315,5 @@ from .camera import *
 from .rtc import *
 from .system import *
 from .states import *
-from .schedule import *
 from .app_config import *
 from .message import *

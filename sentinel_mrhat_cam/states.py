@@ -132,9 +132,12 @@ class ShutdownState(State):
         # Keep this during development
         logging.info(f"Accumulated runtime: {app.runtime}")
 
+        # Debugging
+        app.set_state(CreateMessageState())
+
         period: int = app.config.active["period"]  # period of the message sending
         waiting_time: float = max(period - app.runtime, 0)  # time to wait in between the new message creation
-        self._shutdown_mode(period, waiting_time)
+        self._shutdown_mode(app, period, waiting_time)
 
     def _shutdown_mode(self, app: Context, period: int, waiting_time: float) -> None:
         # If the period is negative then we must wake up at the end of this time interval

@@ -198,7 +198,8 @@ class RTC(IRTC):
     def localize_time(time: str) -> str:
         # Get the current date and attach the input time to it to account for daylight saving time
         today = datetime.now(pytz.utc).date()
-        utc_time = datetime.strptime(time, "%H:%M:%S").replace(tzinfo=pytz.utc).replace(year=today.year, month=today.month, day=today.day)
+        utc_time = datetime.strptime(time, "%H:%M:%S").replace(
+            tzinfo=pytz.utc).replace(year=today.year, month=today.month, day=today.day)
         budapest_tz = pytz.timezone('Europe/Budapest')
         # Convert the UTC time to Budapest time
         local_time = utc_time.astimezone(budapest_tz)
@@ -229,11 +230,14 @@ class RTC(IRTC):
         - It uses NTP synchronization and updates the RTC if significant time difference is detected.
         """
         try:
+            logging.info("Attempting to get time from RTC")
             # Get all the lines from timedatectl output
             lines = RTC._get_timedatectl()
+            logging.debug(f"timedatectl output: {lines}")
 
             rtc = RTC._extract_time(lines, "RTC time:")
             utc = RTC._extract_time(lines, "Universal time:")
+            logging.info(f"RTC time: {rtc}, UTC time: {utc}")
 
             # If the RTC time is different from the system clock sync them
             if abs((utc - rtc).total_seconds()) > 2:
@@ -243,6 +247,8 @@ class RTC(IRTC):
                 lines = RTC._get_timedatectl()
                 utc = RTC._extract_time(lines, "Universal time:")
 
+            time_str = str(utc.strftime("%H:%M:%S"))
+            logging.info(f"Returning time: {time_str}")
             return str(utc.strftime("%H:%M:%S"))
 
         except Exception as e:

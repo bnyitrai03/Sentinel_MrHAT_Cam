@@ -1,5 +1,5 @@
-from .system import ISystem
-from .rtc import IRTC
+from .system import ISystem, System
+from .rtc import IRTC, RTC
 from .camera import ICamera
 import numpy as np
 from PIL import Image
@@ -115,8 +115,8 @@ class MessageCreator:
         - The function also logs additional hardware information to a separate file for further analysis.
         """
         try:
-            hardware_info = ISystem.get_hardware_info()
-            timestamp = IRTC.get_time()
+            hardware_info = System.get_hardware_info()
+            timestamp = RTC.get_time()
             image = self._create_base64_image()
 
             message: Dict[str, Any] = {

@@ -3,7 +3,7 @@ import logging
 import json
 from datetime import datetime
 from .static_config import CONFIG_PATH, CONFIGACK_TOPIC, MINIMUM_WAIT_TIME, MAXIMUM_WAIT_TIME
-from .rtc import IRTC
+from .rtc import IRTC, RTC
 from .mqtt import ICommunication
 import re
 
@@ -131,27 +131,35 @@ class Config:
         """
         Generate an active configuration based on the current time from RTC.
         """
-        current_time_str = IRTC.get_time()
-        current_time = datetime.strptime(current_time_str, "%H:%M:%S").time()
+        try:
+            current_time_str = RTC.get_time()
+            if current_time_str is None:
+                raise ValueError("IRTC.get_time() returned None")
 
-        active_config = {
-            "uuid": self._data["uuid"],
-            "quality": self._data["quality"]
-        }
+            current_time = datetime.strptime(current_time_str, "%H:%M:%S").time()
 
-        for timing in self._data['timing']:
-            start_time = datetime.strptime(timing['start'], "%H:%M:%S").time()
-            end_time = datetime.strptime(timing['end'], "%H:%M:%S").time()
+            active_config = {
+                "uuid": self._data["uuid"],
+                "quality": self._data["quality"]
+            }
 
-            if start_time <= current_time < end_time:
-                active_config.update({
-                    "period": timing["period"],
-                    "start": timing["start"],
-                    "end": timing["end"]
-                })
-                break
+            for timing in self._data['timing']:
+                start_time = datetime.strptime(timing['start'], "%H:%M:%S").time()
+                end_time = datetime.strptime(timing['end'], "%H:%M:%S").time()
 
-        self.active = active_config
+                if start_time <= current_time < end_time:
+                    active_config.update({
+                        "period": timing["period"],
+                        "start": timing["start"],
+                        "end": timing["end"]
+                    })
+                    break
+
+            self.active = active_config
+
+        except Exception as e:
+            logging.error(f"Error in _set_active_config method: {e}")
+            raise
 
     @staticmethod
     def validate_config(new_config: Dict[str, Any]) -> None:
