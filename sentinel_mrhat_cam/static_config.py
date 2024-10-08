@@ -9,7 +9,7 @@ TEMP_CONFIG_PATH = os.path.join(CONFIG_DIR, 'temp_config.json')
 STATE_FILE_PATH = os.path.join(CONFIG_DIR, 'state_file.json')
 
 # MQTT Configuration
-BROKER = "192.168.0.232"
+BROKER = "192.168.68.108"
 PORT = 1883
 IMAGE_TOPIC = "mqtt/rpi/image"
 CONFIGACK_TOPIC = "er-edge/confirm"

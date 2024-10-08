@@ -182,14 +182,16 @@ class MQTT(ICommunication):
         def on_message(client: Any, userdata: Any, message: Any) -> None:
             from .app_config import Config
 
-            # Debugging
-            receive_time = time.time()
-            formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(receive_time))
-
-            print(
-                f"Received message: {message.payload.decode()}, at {formatted_time}")
+            print("\n Inside on_message \n")
 
             try:
+
+                # Debugging
+                receive_time = time.time()
+                formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(receive_time))
+
+                print(
+                    f"Received message: {message.payload.decode()}, at {formatted_time}")
                 # If they dont want to send a new config, just send a config-ok,
                 # and we will proceed without changing the configuration
                 if message.payload.decode() == "config-ok":
@@ -227,6 +229,7 @@ class MQTT(ICommunication):
 
         self.client.on_message = on_message
         self.client.subscribe(self._subtopic)
+        print(f"Subscribed to topic: {self._subtopic}")
 
     def is_connected(self) -> bool:
         return self.client.is_connected()

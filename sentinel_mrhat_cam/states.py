@@ -34,7 +34,7 @@ class Context:
         self.system: ISystem = System()
         self.schedule: Schedule = Schedule()
 
-        # self.message_creator: MessageCreator = MessageCreator(self.system, self.rtc, self.camera)
+        self.message_creator: MessageCreator = MessageCreator(self.system, self.rtc, self.camera)
         self.logger = logger
         self.message: str = "Uninitialized message"
 
@@ -109,8 +109,8 @@ class ConfigCheckState(State):
     def handle(self, app: Context) -> None:
         logging.info("In ConfigCheckState")
 
-        self.wait_for_config()
-        self.load()
+        self.wait_for_config(app)
+        self.load(app)
 
         logging.info(f"Active config: {app.config.active}")
         app.set_state(TransmitState())
