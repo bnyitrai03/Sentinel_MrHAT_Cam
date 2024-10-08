@@ -288,8 +288,8 @@ class MQTT(ICommunication):
             self.client.connect(self._broker, self._port)
             # Resetting the counter after a successful connection
             self.broker_connect_counter = 0
-            self.client.loop_start()
             self.init_receive()
+            self.client.loop_start()
 
         except Exception as e:
             logging.error(f"Error connecting to MQTT broker: {e}")

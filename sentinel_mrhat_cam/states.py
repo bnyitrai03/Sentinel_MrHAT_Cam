@@ -91,8 +91,8 @@ class CreateMessageState(State):
         # Connect to the remote server if not connected already
         if not app.communication.is_connected():
             app.communication.connect()
-            app.communication.init_receive()
-            app.logger.start_remote_logging(app.communication)
+            # app.communication.init_receive()
+            # app.logger.start_remote_logging(app.communication)
 
         app.set_state(ConfigCheckState())
 
@@ -134,6 +134,7 @@ class ShutdownState(State):
 
         # Debugging
         app.set_state(CreateMessageState())
+        return
 
         period: int = app.config.active["period"]  # period of the message sending
         waiting_time: float = max(period - app.runtime, 0)  # time to wait in between the new message creation
