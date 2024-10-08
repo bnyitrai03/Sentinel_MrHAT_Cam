@@ -192,6 +192,8 @@ class MQTT(ICommunication):
                     self.config_received_event.set()
                     print("Event has been set")
 
+                    return
+
                 # Parse the JSON message
                 config_data = json.loads(message.payload)
                 Config.validate_config(config_data)
