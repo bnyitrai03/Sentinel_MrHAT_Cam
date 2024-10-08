@@ -186,24 +186,11 @@ class MQTT(ICommunication):
 
             try:
 
-                # Debugging
-                receive_time = time.time()
-                formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(receive_time))
-
-                print(
-                    f"Received message: {message.payload.decode()}, at {formatted_time}")
-                # If they dont want to send a new config, just send a config-ok,
-                # and we will proceed without changing the configuration
+                print(f"\nReceived message: {message.payload.decode()}")
                 if message.payload.decode() == "config-ok":
                     print("About to set event")
                     self.config_received_event.set()
                     print("Event has been set")
-                    set_time = time.time()
-                    formatted_set_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(set_time))
-                    delay = set_time - receive_time
-                    print(f"Event set at {formatted_set_time}, delay: {delay:.6f}")
-
-                    return
 
                 # Parse the JSON message
                 config_data = json.loads(message.payload)
@@ -300,6 +287,7 @@ class MQTT(ICommunication):
             # Resetting the counter after a successful connection
             self.broker_connect_counter = 0
             self.client.loop_start()
+            self.init_receive()
 
         except Exception as e:
             logging.error(f"Error connecting to MQTT broker: {e}")
@@ -318,12 +306,8 @@ class MQTT(ICommunication):
     def wait_for_config(self, uuid: str, topic: str) -> None:
         logging.info("Waiting for config")
         self.config_received_event.clear()
-        start_time = time.time()
         self.send(uuid, topic)
-
         if self.config_received_event.wait(timeout=10):
-            end_time = time.time()
-            logging.info(f"Config received after {end_time - start_time:.3f} seconds")
-            return
+            print("Config received")
         else:
-            logging.error("Timeout waiting for config\n")
+            print("Timeout waiting for config")
