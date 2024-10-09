@@ -11,7 +11,7 @@ except ImportError:
     mqtt_client = None  # type: ignore
     mqtt_enums = None  # type: ignore
 
-from .static_config import BROKER, CONFIGSUB_TOPIC, PORT, QOS, TEMP_CONFIG_PATH, CONFIG_PATH, USERNAME, PASSWORD
+from .static_config import BROKER, CONFIGSUB_TOPIC, PORT, QOS, TEMP_CONFIG_PATH, CONFIG_PATH, USERNAME, PASSWORD, CONFIGACK_TOPIC, MAX_WAIT_TIME_FOR_CONFG
 
 import json
 import socket
@@ -188,10 +188,8 @@ class MQTT(ICommunication):
 
                 print(f"\nReceived message: {message.payload.decode()}")
                 if message.payload.decode() == "config-ok":
-                    print("About to set event")
+                    self.config_confirm_message = "config-ok"
                     self.config_received_event.set()
-                    print("Event has been set")
-
                     return
 
                 # Parse the JSON message
@@ -309,7 +307,11 @@ class MQTT(ICommunication):
         logging.info("Waiting for config")
         self.config_received_event.clear()
         self.send(uuid, topic)
-        if self.config_received_event.wait(timeout=10):
+        if self.config_received_event.wait(MAX_WAIT_TIME_FOR_CONFG):
             print("Config received")
         else:
             print("Timeout waiting for config")
+            self.config_confirm_message = "config-nok | Timed out waiting for config"
+
+        logging.info(f"config_confirm_message: {self.config_confirm_message}")
+        self.send(self.config_confirm_message, CONFIGACK_TOPIC)

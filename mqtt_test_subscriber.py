@@ -1,12 +1,12 @@
 import logging
 from paho.mqtt import client as mqtt_client
-from sentinel_mrhat_cam import BROKER
+from sentinel_mrhat_cam import BROKER, IMAGE_TOPIC
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 broker = BROKER
 port = 1883
-topic = "config/er-edge"
+topic = IMAGE_TOPIC
 
 
 def on_connect(client, userdata, flags, rc, properties=None):

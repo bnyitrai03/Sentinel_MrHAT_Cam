@@ -1,10 +1,10 @@
 from paho.mqtt import client as mqtt_client
-from sentinel_mrhat_cam import BROKER, CONFIGACKTOPIC, PORT
+from sentinel_mrhat_cam import BROKER, CONFIGACK_TOPIC, PORT
 import logging
 
 broker = BROKER
 port = PORT
-topic = CONFIGACKTOPIC
+topic = CONFIGACK_TOPIC
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',

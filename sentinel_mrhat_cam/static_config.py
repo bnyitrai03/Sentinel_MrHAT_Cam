@@ -9,7 +9,8 @@ TEMP_CONFIG_PATH = os.path.join(CONFIG_DIR, 'temp_config.json')
 STATE_FILE_PATH = os.path.join(CONFIG_DIR, 'state_file.json')
 
 # MQTT Configuration
-BROKER = "192.168.68.108"
+BROKER = "192.168.0.232"
+# BROKER = "192.168.68.108"
 PORT = 1883
 IMAGE_TOPIC = "mqtt/rpi/image"
 CONFIGACK_TOPIC = "er-edge/confirm"
@@ -18,6 +19,7 @@ QOS = 2
 USERNAME = "er-edge"
 PASSWORD = "admin"
 UUID_TOPIC = "cam4/uuid"
+MAX_WAIT_TIME_FOR_CONFG = 60
 
 # Prod topics
 """ PORT = 1883

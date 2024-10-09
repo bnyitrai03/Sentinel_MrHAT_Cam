@@ -237,7 +237,7 @@ class RTC(IRTC):
 
             rtc = RTC._extract_time(lines, "RTC time:")
             utc = RTC._extract_time(lines, "Universal time:")
-            logging.info(f"RTC time: {rtc}, UTC time: {utc}")
+            logging.info(f"RTC time: {rtc.strftime('%H:%M:%S')}, UTC time: {utc.strftime('%H:%M:%S')}")
 
             # If the RTC time is different from the system clock sync them
             if abs((utc - rtc).total_seconds()) > 2:
@@ -248,7 +248,7 @@ class RTC(IRTC):
                 utc = RTC._extract_time(lines, "Universal time:")
 
             time_str = str(utc.strftime("%H:%M:%S"))
-            logging.info(f"Returning time: {time_str}")
+            logging.info(f"Time now: {time_str}")
             return str(utc.strftime("%H:%M:%S"))
 
         except Exception as e:

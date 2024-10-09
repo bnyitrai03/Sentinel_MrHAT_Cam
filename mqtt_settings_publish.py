@@ -4,7 +4,7 @@ from sentinel_mrhat_cam import BROKER, CONFIGSUB_TOPIC
 
 broker = BROKER
 port = 1883
-topic = "config/er-edge"
+topic = CONFIGSUB_TOPIC
 
 # Path to your config.json file
 config_path = "config/sentinel_app_config.json"
@@ -29,8 +29,8 @@ def publish(client):
             config_data = json.load(file)
 
         # Convert the JSON object to a string
-        # message = json.dumps(config_data)
-        message = "config-ok"
+        message = json.dumps(config_data)
+        # message = "config-ok"
 
         result = client.publish(topic, message, qos=2)
         result.wait_for_publish()

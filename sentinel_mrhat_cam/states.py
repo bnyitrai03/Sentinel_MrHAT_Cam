@@ -78,7 +78,7 @@ class InitState(State):
     @Context.log_and_save_execution_time(operation_name="InitState")
     def handle(self, app: Context) -> None:
         logging.info("In InitState")
-        app.camera.start()
+        # app.camera.start()
         app.set_state(CreateMessageState())
 
 
@@ -86,7 +86,7 @@ class CreateMessageState(State):
     @Context.log_and_save_execution_time(operation_name="CreateMessageState")
     def handle(self, app: Context) -> None:
         logging.info("In CreateMessageState")
-        app.message = app.message_creator.create_message()
+        # app.message = app.message_creator.create_message()
         logging.info("After creating message")
 
         # Connect to the remote server if not connected already
