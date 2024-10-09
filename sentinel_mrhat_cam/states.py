@@ -87,12 +87,13 @@ class CreateMessageState(State):
     def handle(self, app: Context) -> None:
         logging.info("In CreateMessageState")
         app.message = app.message_creator.create_message()
+        logging.info("After creating message")
 
         # Connect to the remote server if not connected already
         if not app.communication.is_connected():
             app.communication.connect()
             # app.communication.init_receive()
-            # app.logger.start_remote_logging(app.communication)
+            app.logger.start_remote_logging(app.communication)
 
         app.set_state(ConfigCheckState())
 

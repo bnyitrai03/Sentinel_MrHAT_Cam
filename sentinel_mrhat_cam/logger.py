@@ -80,7 +80,7 @@ class Logger(logging.Handler):
 
     def start_remote_logging(self, mqtt: ICommunication) -> None:
         self._remote = mqtt
-        self._remote.connect()
+        # self._remote.connect()
         self._start_event.set()
 
     def stop_remote_logging(self) -> None:
