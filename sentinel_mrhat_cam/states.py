@@ -78,7 +78,7 @@ class InitState(State):
     @Context.log_and_save_execution_time(operation_name="InitState")
     def handle(self, app: Context) -> None:
         logging.info("In InitState")
-        # app.camera.start()
+        app.camera.start()
         app.set_state(CreateMessageState())
 
 
@@ -86,13 +86,12 @@ class CreateMessageState(State):
     @Context.log_and_save_execution_time(operation_name="CreateMessageState")
     def handle(self, app: Context) -> None:
         logging.info("In CreateMessageState")
-        # app.message = app.message_creator.create_message()
+        app.message = app.message_creator.create_message()
         logging.info("After creating message")
 
         # Connect to the remote server if not connected already
         if not app.communication.is_connected():
             app.communication.connect()
-            # app.communication.init_receive()
             app.logger.start_remote_logging(app.communication)
 
         app.set_state(ConfigCheckState())
@@ -132,10 +131,6 @@ class ShutdownState(State):
         logging.info("In ShutDownState")
         # Keep this during development
         logging.info(f"Accumulated runtime: {app.runtime}")
-
-        # Debugging
-        app.set_state(CreateMessageState())
-        return
 
         period: int = app.config.active["period"]  # period of the message sending
         waiting_time: float = max(period - app.runtime, 0)  # time to wait in between the new message creation
