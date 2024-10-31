@@ -3,6 +3,7 @@ from .rtc import IRTC, RTC
 from .camera import ICamera
 import numpy as np
 from PIL import Image
+from unittest.mock import MagicMock
 import io
 import base64
 import logging
@@ -49,7 +50,7 @@ class MessageCreator:
         """
         # Get picture from camera
         image_array = self._camera.capture()
-        if image_array is None:
+        if image_array is None or isinstance(image_array, MagicMock):
             return "Error: Camera was unable to capture the image."
 
         image: Image.Image = Image.fromarray(image_array)

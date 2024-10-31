@@ -1,8 +1,0 @@
-scp ~/Sentinel_MrHAT_Cam/sentinel_mrhat_cam/{__init__.py,app_config.py,camera.py,logger.py,message.py,mqtt.py,rtc.py,schedule.py,states.py,static_config.py,system.py}  admin@192.168.0.181:/home/admin/sentinel_mrhat_cam
-scp ~/Sentinel_MrHAT_Cam/bin/sentinel_mrhat_cam_main.py  admin@192.168.0.181:/home/admin
-scp ~/Sentinel_MrHAT_Cam/config/{sentinel_app_config.json,sentinel_log_config.yaml}  admin@192.168.0.181:/home/admin/config
-scp ~/Sentinel_MrHAT_Cam/date.py admin@192.168.0.181:/home/admin
-
-scp ~/Egyetem/Sentinel_MrHAT_Cam/sentinel_mrhat_cam/{__init__.py,app_config.py,camera.py,logger.py,message.py,mqtt.py,rtc.py,states.py,static_config.py,system.py}  admin@192.168.68.112:/home/admin/sentinel_mrhat_cam
-scp ~/Egyetem/Sentinel_MrHAT_Cam/bin/sentinel_mrhat_cam_main.py  admin@192.168.68.112:/home/admin
-scp ~/Egyetem/Sentinel_MrHAT_Cam/config/{sentinel_app_config.json,sentinel_log_config.yaml}  admin@192.168.68.112:/home/admin/config

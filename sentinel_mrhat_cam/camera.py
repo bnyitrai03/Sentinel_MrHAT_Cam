@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Optional
 import numpy as np
 from unittest.mock import MagicMock
+from PIL import Image
+import numpy as np
 try:
     from libcamera import controls
     from picamera2 import Picamera2
@@ -62,7 +64,7 @@ class Camera(ICamera):
         config = self._cam.create_still_configuration({"size": (self._width, self._height)})
         self._cam.configure(config)
         self._cam.options["quality"] = self._quality
-        self._cam.set_controls({"AfMode": controls.AfModeEnum.Continuous})
+        # self._cam.set_controls({"AfMode": controls.AfModeEnum.Continuous})
         self._cam.start(show_preview=False)
         logging.info("Camera started")
 
@@ -77,10 +79,8 @@ class Camera(ICamera):
         """
         try:
             image = self._cam.capture_array()
+            logging.info("Image capture successful!")
         except Exception as e:
             logging.error(f"Error during image capture: {e}")
             return None
         return image
-
-    def update_configuration(self, config: dict[str, str]) -> None:
-        self._config = config

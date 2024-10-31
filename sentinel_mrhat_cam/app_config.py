@@ -3,7 +3,7 @@ import logging
 import json
 from datetime import datetime
 from .static_config import CONFIG_PATH, CONFIGACK_TOPIC, MINIMUM_WAIT_TIME, MAXIMUM_WAIT_TIME
-from .rtc import IRTC, RTC
+from .rtc import RTC
 from .mqtt import ICommunication
 import re
 
@@ -19,8 +19,6 @@ class Config:
 
         Parameters
         ----------
-        rtc : IRTC
-            An instance of the RTC interface.
         mqtt : ICommunication
             An instance of the MQTT communication interface.
         """
@@ -134,7 +132,7 @@ class Config:
         try:
             current_time_str = RTC.get_time()
             if current_time_str is None:
-                raise ValueError("IRTC.get_time() returned None")
+                raise ValueError("RTC.get_time() returned None")
 
             current_time = datetime.strptime(current_time_str, "%H:%M:%S").time()
 

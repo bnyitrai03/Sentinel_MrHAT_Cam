@@ -129,8 +129,6 @@ class TransmitState(State):
 class ShutdownState(State):
     def handle(self, app: Context) -> None:
         logging.info("In ShutDownState")
-        # Keep this during development
-        logging.info(f"Accumulated runtime: {app.runtime}")
 
         period: int = app.config.active["period"]  # period of the message sending
         waiting_time: float = max(period - app.runtime, 0)  # time to wait in between the new message creation
@@ -151,6 +149,7 @@ class ShutdownState(State):
 
         # If the time to wait before taking the next image is short, then we sleep that much
         else:
+            logging.info(f"sleeping for {waiting_time} seconds")
             time.sleep(waiting_time)
             # reset the runtime
             app.runtime = 0

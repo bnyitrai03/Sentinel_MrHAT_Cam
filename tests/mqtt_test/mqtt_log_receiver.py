@@ -2,7 +2,7 @@
 
 from paho.mqtt import client as mqtt_client
 import logging
-from sentinel_mrhat_cam import BROKER, PORT, USERNAME, PASSWORD, LOGGING_TOPIC, QOS
+from sentinel_mrhat_cam.static_config import BROKER, PORT, USERNAME, PASSWORD, LOGGING_TOPIC, QOS
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
