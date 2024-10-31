@@ -8,31 +8,6 @@ CONFIG_PATH = os.path.join(CONFIG_DIR, 'sentinel_app_config.json')
 TEMP_CONFIG_PATH = os.path.join(CONFIG_DIR, 'temp_config.json')
 STATE_FILE_PATH = os.path.join(CONFIG_DIR, 'state_file.json')
 
-# MQTT Configuration
-BROKER = "192.168.0.232"
-# BROKER = "192.168.68.108"
-PORT = 1883
-IMAGE_TOPIC = "mqtt/rpi/image"
-CONFIGACK_TOPIC = "er-edge/confirm"
-CONFIGSUB_TOPIC = "config/er-edge"
-QOS = 2
-USERNAME = "er-edge"
-PASSWORD = "admin"
-UUID_TOPIC = "cam4/uuid"
-MAX_WAIT_TIME_FOR_CONFG = 60
-
-# Prod topics
-""" PORT = 1883
-QOS = 2
-BROKER = "37.220.137.22"
-IMAGE_TOPIC = "sentinel/cam4"
-CONFIGACK_TOPIC = "cam4/confirm"
-CONFIGSUB_TOPIC = "settings/cam4"
-USERNAME = "cam4"
-PASSWORD = "rubin2024cam4" """
-LOGGING_TOPIC = "cam4/log"
-LOG_LEVEL = logging.INFO
-
 # App configuration
 """
 if  `period` < **SHUTDOWN_THRESHOLD** :
