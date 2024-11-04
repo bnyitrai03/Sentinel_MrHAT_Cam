@@ -1,6 +1,9 @@
 from paho.mqtt import client as mqtt_client
-from sentinel_mrhat_cam import BROKER, CONFIGACK_TOPIC, PORT
+import sys
 import logging
+
+sys.path.append('/home/bence/Sentinel_MrHAT_Cam')
+from sentinel_mrhat_cam import BROKER, CONFIGACK_TOPIC, PORT
 
 broker = BROKER
 port = PORT

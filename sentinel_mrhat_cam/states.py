@@ -5,8 +5,8 @@ from functools import wraps
 from typing import Optional, Any, TypeVar, Callable, cast, Union
 from .camera import ICamera, Camera
 from .mqtt import ICommunication, MQTT
-from .system import ISystem
-from .rtc import IRTC
+from .system import ISystem, System
+from .rtc import IRTC, RTC
 from .app_config import Config
 from .message import MessageCreator
 from .logger import Logger
@@ -28,7 +28,9 @@ class Context:
         self.communication: ICommunication = MQTT()
         self.config: Config = Config(self.communication)
         self.camera: ICamera = Camera(self.config.active)
-        self.message_creator: MessageCreator = MessageCreator(self.camera)
+        self.system: ISystem = System()
+        self.rtc: IRTC = RTC()
+        self.message_creator: MessageCreator = MessageCreator(self.camera, self.rtc, self.system)
         self.logger = logger
         self.message: str = "Uninitialized message"
 
@@ -37,6 +39,10 @@ class Context:
 
     def set_state(self, state: State) -> None:
         self._state = state
+
+    @staticmethod
+    def reset_runtime()-> None:
+        Context.runtime = 0.0
 
     @staticmethod
     def log_and_save_execution_time(operation_name: Optional[str] = None) -> Callable[[F], F]:
@@ -132,12 +138,17 @@ class ShutdownState(State):
 
         period: int = app.config.active["period"]  # period of the message sending
         waiting_time: float = max(period - app.runtime, 0)  # time to wait in between the new message creation
+        
+        logging.info(f"period: {period}")
+        logging.info(f"waiting time: {waiting_time}")
+        logging.info(f"run time: {app.runtime}")
+        
         self._shutdown_mode(app, period, waiting_time)
 
     def _shutdown_mode(self, app: Context, period: int, waiting_time: float) -> None:
         # If the period is negative then we must wake up at the end of this time interval
         if period < 0:
-            local_wake_time = IRTC.localize_time(app.config.active["end"])
+            local_wake_time = app.rtc.localize_time(app.config.active["end"])
             logging.info("Pi shutting down")
             self._shutdown(app, local_wake_time)
 
@@ -152,11 +163,11 @@ class ShutdownState(State):
             logging.info(f"sleeping for {waiting_time} seconds")
             time.sleep(waiting_time)
             # reset the runtime
-            app.runtime = 0
+            app.reset_runtime()
             app.set_state(CreateMessageState())
 
     def _shutdown(self, app: Context, wake_time: Union[str, int, float]) -> None:
         logging.info(f"Wake time is: {wake_time}")
         app.logger.stop_remote_logging()
         app.communication.disconnect()
-        ISystem.schedule_wakeup(wake_time)
+        app.system.schedule_wakeup(wake_time)

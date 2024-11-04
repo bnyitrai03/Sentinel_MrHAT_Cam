@@ -2,6 +2,9 @@
 
 from paho.mqtt import client as mqtt_client
 import logging
+import sys
+
+sys.path.append('/home/bence/Sentinel_MrHAT_Cam')
 from sentinel_mrhat_cam.static_config import BROKER, PORT, USERNAME, PASSWORD, LOGGING_TOPIC, QOS
 
 # Configure logging

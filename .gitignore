@@ -170,3 +170,4 @@ myenv/
 
 cheat_sheet/
 .vscode
+sentinel_mrhat_cam/static_config.py

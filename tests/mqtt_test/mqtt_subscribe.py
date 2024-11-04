@@ -6,11 +6,11 @@ import json
 from PIL import Image
 import io
 from datetime import datetime
-from dateutil import parser
+import sys
 import pytz
-from sentinel_mrhat_cam import BROKER
 
-start_time = None
+sys.path.append('/home/bence/Sentinel_MrHAT_Cam')
+from sentinel_mrhat_cam import BROKER
 
 broker = BROKER
 port = 1883

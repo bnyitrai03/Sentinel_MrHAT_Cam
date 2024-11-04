@@ -1,5 +1,8 @@
 import logging
 from paho.mqtt import client as mqtt_client
+import sys
+
+sys.path.append('/home/bence/Sentinel_MrHAT_Cam')
 from sentinel_mrhat_cam import BROKER, IMAGE_TOPIC
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')

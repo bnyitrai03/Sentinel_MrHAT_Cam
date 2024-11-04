@@ -1,5 +1,8 @@
 import json
 from paho.mqtt import client as mqtt_client
+import sys
+
+sys.path.append('/home/bence/Sentinel_MrHAT_Cam')
 from sentinel_mrhat_cam import BROKER, CONFIGSUB_TOPIC
 
 broker = BROKER
@@ -29,8 +32,8 @@ def publish(client):
             config_data = json.load(file)
 
         # Convert the JSON object to a string
-        # message = json.dumps(config_data)
-        message = "config-ok"
+        message = json.dumps(config_data)
+        # message = "config-ok"
 
         result = client.publish(topic, message, qos=2)
         result.wait_for_publish()

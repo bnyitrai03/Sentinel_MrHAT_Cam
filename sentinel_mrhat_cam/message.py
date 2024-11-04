@@ -1,5 +1,5 @@
-from .system import ISystem, System
-from .rtc import IRTC, RTC
+from .system import ISystem
+from .rtc import IRTC
 from .camera import ICamera
 import numpy as np
 from PIL import Image
@@ -12,8 +12,10 @@ import json
 
 
 class MessageCreator:
-    def __init__(self, camera: ICamera):
+    def __init__(self, camera: ICamera, rtc: IRTC, system: ISystem):
         self._camera = camera
+        self._rtc = rtc
+        self._system = system
 
     def _create_base64_image(self) -> str:
         """
@@ -116,8 +118,8 @@ class MessageCreator:
         - The function also logs additional hardware information to a separate file for further analysis.
         """
         try:
-            hardware_info = System.get_hardware_info()
-            timestamp = RTC.get_time()
+            hardware_info = self._system.get_hardware_info()
+            timestamp = self._rtc.get_time()
             image = self._create_base64_image()
 
             message: Dict[str, Any] = {
