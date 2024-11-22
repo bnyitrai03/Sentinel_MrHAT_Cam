@@ -25,7 +25,6 @@ class ICamera(ABC):
 
 class Camera(ICamera):
     def __init__(self, config: dict[str, str]) -> None:
-        self._quality = 95
         self._cam = Picamera2()
         self._config = config
 
@@ -63,7 +62,7 @@ class Camera(ICamera):
         """
         config = self._cam.create_still_configuration({"size": (self._width, self._height)})
         self._cam.configure(config)
-        self._cam.options["quality"] = self._quality
+        self._cam.options["quality"] = 95
         # self._cam.set_controls({"AfMode": controls.AfModeEnum.Continuous})
         self._cam.start(show_preview=False)
         logging.info("Camera started")

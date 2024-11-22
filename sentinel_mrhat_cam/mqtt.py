@@ -3,19 +3,16 @@ import logging
 import time
 import shutil
 from typing import Any
-
+import json
+import socket
+import threading
 try:
     from paho.mqtt import client as mqtt_client
     from paho.mqtt import enums as mqtt_enums
 except ImportError:
     mqtt_client = None  # type: ignore
     mqtt_enums = None  # type: ignore
-
 from .static_config import BROKER, CONFIGSUB_TOPIC, PORT, QOS, TEMP_CONFIG_PATH, CONFIG_PATH, USERNAME, PASSWORD, CONFIGACK_TOPIC, MAX_WAIT_TIME_FOR_CONFG
-
-import json
-import socket
-import threading
 
 
 class ICommunication(ABC):
@@ -26,13 +23,13 @@ class ICommunication(ABC):
     @abstractmethod
     def disconnect(self) -> None:
         pass
-
+    
     @abstractmethod
-    def is_connected(self) -> bool:
+    def send(self, message: str, topic: str) -> None:
         pass
 
     @abstractmethod
-    def send(self, message: str, topic: str) -> None:
+    def is_connected(self) -> bool:
         pass
 
     @abstractmethod

@@ -27,11 +27,11 @@ class Logger(logging.Handler):
             msg = self.format(record)
             self._log_queue.put(msg)
             if self._start_event.is_set():
-                self.publish_loop(LOGGING_TOPIC)
+                self._publish_loop(LOGGING_TOPIC)
         except Exception as e:
             print(f"Error in Logger emit: {e}")
 
-    def publish_loop(self, topic: str) -> None:
+    def _publish_loop(self, topic: str) -> None:
         """
         Continuously retrieves and publishes log messages from the queue to the remote server.
 

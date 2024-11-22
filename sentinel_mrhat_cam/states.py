@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import time
 import logging
 from functools import wraps
-from typing import Optional, Any, TypeVar, Callable, cast, Union
+from typing import Any, TypeVar, Callable, cast, Union
 from .camera import ICamera, Camera
 from .mqtt import ICommunication, MQTT
 from .system import ISystem, System
@@ -45,12 +45,12 @@ class Context:
         Context.runtime = 0.0
 
     @staticmethod
-    def log_and_save_execution_time(operation_name: Optional[str] = None) -> Callable[[F], F]:
+    def log_and_save_execution_time(function_name: str) -> Callable[[F], F]:
         """
         Saves the execution time of the function to the `runtime` variable.
 
         Args:
-            operation_name (Optional[str], optional): Operation description. Defaults to None.
+            function_name (Optional[str], optional): Operation description. Defaults to None.
 
         Returns:
             Callable[[F], F]: Wrapped function with logging.
@@ -62,11 +62,7 @@ class Context:
                 result = func(*args, **kwargs)
                 end_time = time.perf_counter()
                 execution_time = end_time - start_time
-
-                if operation_name:
-                    log_message = f"{operation_name} ({func.__name__}) took {execution_time:.6f} seconds"
-                else:
-                    log_message = f"{func.__name__} took {execution_time:.6f} seconds"
+                log_message = f"{function_name} took {execution_time:.6f} seconds"
 
                 # Update the class-level runtime
                 Context.runtime += execution_time
@@ -81,7 +77,7 @@ class Context:
 
 
 class InitState(State):
-    @Context.log_and_save_execution_time(operation_name="InitState")
+    @Context.log_and_save_execution_time(function_name="InitState")
     def handle(self, app: Context) -> None:
         logging.info("In InitState")
         app.camera.start()
@@ -89,7 +85,7 @@ class InitState(State):
 
 
 class CreateMessageState(State):
-    @Context.log_and_save_execution_time(operation_name="CreateMessageState")
+    @Context.log_and_save_execution_time(function_name="CreateMessageState")
     def handle(self, app: Context) -> None:
         logging.info("In CreateMessageState")
         app.message = app.message_creator.create_message()
@@ -104,37 +100,34 @@ class CreateMessageState(State):
 
 
 class ConfigCheckState(State):
-    @Context.log_and_save_execution_time(operation_name="ConfigCheckState")
+    @Context.log_and_save_execution_time(function_name="ConfigCheckState")
     def handle(self, app: Context) -> None:
         logging.info("In ConfigCheckState")
-
-        self.wait_for_config(app)
-        self.load(app)
-
-        logging.info(f"Active config: {app.config.active}")
+        app.communication.wait_for_config(app.config.active["uuid"], UUID_TOPIC)
+        app.config.load()
 
         app.set_state(TransmitState())
 
-    @Context.log_and_save_execution_time(operation_name="ConfigLoad")
-    def load(self, app: Context) -> None:
+    @Context.log_and_save_execution_time(function_name="ConfigLoad")
+    def _load_new_config(self, app: Context) -> None:
         app.config.load()
 
-    @Context.log_and_save_execution_time(operation_name="ConfigAcknowledge")
-    def wait_for_config(self, app: Context) -> None:
+    @Context.log_and_save_execution_time(function_name="ConfigAcknowledge")
+    def _wait_for_config(self, app: Context) -> None:
         app.communication.wait_for_config(app.config.active["uuid"], UUID_TOPIC)
 
 
 class TransmitState(State):
-    @Context.log_and_save_execution_time(operation_name="TransmitState")
+    @Context.log_and_save_execution_time(function_name="TransmitState")
     def handle(self, app: Context) -> None:
         logging.info("In TransmitState")
         app.communication.send(app.message, IMAGE_TOPIC)
-        app.set_state(ShutdownState())
+        app.set_state(IdleState ())
 
 
-class ShutdownState(State):
+class IdleState (State):
     def handle(self, app: Context) -> None:
-        logging.info("In ShutDownState")
+        logging.info("In IdleState")
 
         period: int = app.config.active["period"]  # period of the message sending
         waiting_time: float = max(period - app.runtime, 0)  # time to wait in between the new message creation
@@ -143,9 +136,9 @@ class ShutdownState(State):
         logging.info(f"waiting time: {waiting_time}")
         logging.info(f"run time: {app.runtime}")
         
-        self._shutdown_mode(app, period, waiting_time)
+        self._schedule_next_cycle(app, period, waiting_time)
 
-    def _shutdown_mode(self, app: Context, period: int, waiting_time: float) -> None:
+    def _schedule_next_cycle(self, app: Context, period: int, waiting_time: float) -> None:
         # If the period is negative then we must wake up at the end of this time interval
         if period < 0:
             local_wake_time = app.rtc.localize_time(app.config.active["end"])

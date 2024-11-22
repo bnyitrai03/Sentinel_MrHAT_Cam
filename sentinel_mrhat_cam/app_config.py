@@ -23,7 +23,7 @@ class Config:
             An instance of the MQTT communication interface.
         """
         self._path: str = CONFIG_PATH
-        self._data: dict[str, Any] = {}
+        self._full_config: dict[str, Any] = {}
         self.active: dict[str, Any] = {}
         try:
             self.load()
@@ -36,15 +36,12 @@ class Config:
             self.communication.disconnect()
 
             # Load the default config
-            self._data.update(Config._get_default_data())
+            self._full_config.update(Config._get_default_config())
             self.active = self._set_active_config()
             logging.error("Loading config failed, using default config")
 
-    def _check_for_new_config(self) -> None:
-        pass
-
     @staticmethod
-    def _get_default_data() -> Dict[str, Any]:
+    def _get_default_config() -> Dict[str, Any]:
         """
         Defines and returns a default configuration dictionary.
 
@@ -111,7 +108,7 @@ class Config:
 
             Config.validate_config(new_config)
 
-            self._data.update(new_config)
+            self._full_config.update(new_config)
             self._set_active_config()
             logging.info("Config loaded")
 
@@ -137,11 +134,11 @@ class Config:
             current_time = datetime.strptime(current_time_str, "%H:%M:%S").time()
 
             active_config = {
-                "uuid": self._data["uuid"],
-                "quality": self._data["quality"]
+                "uuid": self._full_config["uuid"],
+                "quality": self._full_config["quality"]
             }
 
-            for timing in self._data['timing']:
+            for timing in self._full_config['timing']:
                 start_time = datetime.strptime(timing['start'], "%H:%M:%S").time()
                 end_time = datetime.strptime(timing['end'], "%H:%M:%S").time()
 
