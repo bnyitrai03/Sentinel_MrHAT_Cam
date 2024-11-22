@@ -33,12 +33,13 @@ class ICommunication(ABC):
         pass
 
     @abstractmethod
-    def wait_for_config(self, message: str, topic: str) -> None:
+    def clear_config_received(self)-> None:
         pass
 
     @abstractmethod
-    def init_receive(self) -> None:
+    def wait_for_config(self) -> bool:
         pass
+
 
 
 class MQTT(ICommunication):
@@ -83,6 +84,7 @@ class MQTT(ICommunication):
         self.client = mqtt_client.Client(mqtt_enums.CallbackAPIVersion.VERSION2)
         self.config_confirm_message: str = "config-nok|Confirm message uninitialized"
         self.config_received_event: threading.Event = threading.Event()
+        self.new_config: bool = True
 
     def _broker_check(self) -> None:
         """
@@ -165,7 +167,7 @@ class MQTT(ICommunication):
             logging.error(f"Error during creating connection: {e}")
             exit(1)
 
-    def init_receive(self) -> None:
+    def _init_receive(self) -> None:
         """
         Initializes the MQTT client to receive the config file.
 
@@ -186,6 +188,7 @@ class MQTT(ICommunication):
                 print(f"\nReceived message: {message.payload.decode()}")
                 if message.payload.decode() == "config-ok":
                     self.config_confirm_message = "config-ok"
+                    self.new_config = False
                     self.config_received_event.set()
                     return
 
@@ -201,6 +204,7 @@ class MQTT(ICommunication):
                 shutil.copyfile(TEMP_CONFIG_PATH, CONFIG_PATH)
                 print(f"Config saved to {CONFIG_PATH}")
                 self.config_confirm_message = "config-ok"
+                self.new_config = True
 
             except json.JSONDecodeError as e:
                 self.config_confirm_message = f"config-nok|Invalid JSON received: {e}"
@@ -283,7 +287,7 @@ class MQTT(ICommunication):
             self.client.connect(self._broker, self._port)
             # Resetting the counter after a successful connection
             self.broker_connect_counter = 0
-            self.init_receive()
+            self._init_receive()
             self.client.loop_start()
 
         except Exception as e:
@@ -300,15 +304,18 @@ class MQTT(ICommunication):
             self.client.loop_stop()
             self.client.disconnect()
 
-    def wait_for_config(self, uuid: str, topic: str) -> None:
-        logging.info("Waiting for config")
+    def clear_config_received(self)-> bool:
         self.config_received_event.clear()
-        self.send(uuid, topic)
+
+    def wait_for_config(self) -> bool:
+        logging.info("Waiting for config")
         if self.config_received_event.wait(MAX_WAIT_TIME_FOR_CONFG):
-            print("Config received")
+            logging.info("Config received")
         else:
-            print("Timeout waiting for config")
+            logging.warning("Timeout waiting for config")
             self.config_confirm_message = "config-nok | Timed out waiting for config"
+            self.new_config = False
 
         logging.info(f"config_confirm_message: {self.config_confirm_message}")
         self.send(self.config_confirm_message, CONFIGACK_TOPIC)
+        return self.new_config

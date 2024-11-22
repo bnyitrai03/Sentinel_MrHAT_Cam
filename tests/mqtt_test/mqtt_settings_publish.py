@@ -33,7 +33,7 @@ def publish(client):
 
         # Convert the JSON object to a string
         message = json.dumps(config_data)
-        # message = "config-ok"
+        message = "config-ok"
 
         result = client.publish(topic, message, qos=2)
         result.wait_for_publish()

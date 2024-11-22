@@ -66,7 +66,6 @@ class Context:
 
                 # Update the class-level runtime
                 Context.runtime += execution_time
-                # Log the message using logger
                 logging.info(log_message)
 
                 return result
@@ -103,18 +102,14 @@ class ConfigCheckState(State):
     @Context.log_and_save_execution_time(function_name="ConfigCheckState")
     def handle(self, app: Context) -> None:
         logging.info("In ConfigCheckState")
-        app.communication.wait_for_config(app.config.active["uuid"], UUID_TOPIC)
-        app.config.load()
+        # Send the current config uuid
+        app.communication.clear_config_received()
+        app.communication.send(app.config.active["uuid"], UUID_TOPIC)
+        # If new config is received load it
+        if app.communication.wait_for_config() is True:
+            app.config.load()
 
         app.set_state(TransmitState())
-
-    @Context.log_and_save_execution_time(function_name="ConfigLoad")
-    def _load_new_config(self, app: Context) -> None:
-        app.config.load()
-
-    @Context.log_and_save_execution_time(function_name="ConfigAcknowledge")
-    def _wait_for_config(self, app: Context) -> None:
-        app.communication.wait_for_config(app.config.active["uuid"], UUID_TOPIC)
 
 
 class TransmitState(State):
