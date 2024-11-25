@@ -304,7 +304,7 @@ class MQTT(ICommunication):
             self.client.loop_stop()
             self.client.disconnect()
 
-    def clear_config_received(self)-> bool:
+    def clear_config_received(self)-> None:
         self.config_received_event.clear()
 
     def wait_for_config(self) -> bool:

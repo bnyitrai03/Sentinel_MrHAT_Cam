@@ -15,6 +15,7 @@ class Logger(logging.Handler):
         self._remote = None
         self._start_event = threading.Event()
         self._log_queue: Queue[str] = Queue()
+        # configure the custom log handler
         self.setLevel(LOG_LEVEL)
         formatter = logging.Formatter(
             fmt='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -58,8 +59,7 @@ class Logger(logging.Handler):
                     self._remote.send(msg, topic)
                 else:
                     return
-
-            except Empty:
+            except Empty or TimeoutError:
                 return
             except Exception as e:
                 print(f"Error in Logger publish loop: {e}")

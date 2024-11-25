@@ -117,7 +117,7 @@ class TransmitState(State):
     def handle(self, app: Context) -> None:
         logging.info("In TransmitState")
         app.communication.send(app.message, IMAGE_TOPIC)
-        app.set_state(IdleState ())
+        app.set_state(IdleState())
 
 
 class IdleState (State):
@@ -126,6 +126,8 @@ class IdleState (State):
 
         period: int = app.config.active["period"]  # period of the message sending
         waiting_time: float = max(period - app.runtime, 0)  # time to wait in between the new message creation
+        if waiting_time == 0:
+            logging.warning("The current period is too fast")
         
         logging.info(f"period: {period}")
         logging.info(f"waiting time: {waiting_time}")
@@ -134,23 +136,19 @@ class IdleState (State):
         self._schedule_next_cycle(app, period, waiting_time)
 
     def _schedule_next_cycle(self, app: Context, period: int, waiting_time: float) -> None:
-        # If the period is negative then we must wake up at the end of this time interval
-        if period < 0:
+        if period == -1:
             local_wake_time = app.rtc.localize_time(app.config.active["end"])
             logging.info("Pi shutting down")
             self._shutdown(app, local_wake_time)
 
-        # If the time to wait is longer than the threshold then the Pi shuts down before taking the next picture
         elif waiting_time > SHUTDOWN_THRESHOLD:
             shutdown_duration = max(waiting_time - TIME_TO_BOOT_AND_SHUTDOWN, 0)
             logging.info("Pi shutting down")
             self._shutdown(app, shutdown_duration)
 
-        # If the time to wait before taking the next image is short, then we sleep that much
         else:
             logging.info(f"sleeping for {waiting_time} seconds")
             time.sleep(waiting_time)
-            # reset the runtime
             app.reset_runtime()
             app.set_state(CreateMessageState())
 
