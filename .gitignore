@@ -168,6 +168,6 @@ cython_debug/
 
 myenv/
 
-cheat_sheet/
+docs/
 .vscode
 sentinel_mrhat_cam/static_config.py
