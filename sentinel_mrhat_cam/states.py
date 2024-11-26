@@ -41,7 +41,7 @@ class Context:
         self._state = state
 
     @staticmethod
-    def reset_runtime()-> None:
+    def reset_runtime() -> None:
         Context.runtime = 0.0
 
     @staticmethod
@@ -128,11 +128,11 @@ class IdleState (State):
         waiting_time: float = max(period - app.runtime, 0)  # time to wait in between the new message creation
         if waiting_time == 0:
             logging.warning("The current period is too fast")
-        
+
         logging.info(f"period: {period}")
         logging.info(f"waiting time: {waiting_time}")
         logging.info(f"run time: {app.runtime}")
-        
+
         self._schedule_next_cycle(app, period, waiting_time)
 
     def _schedule_next_cycle(self, app: Context, period: int, waiting_time: float) -> None:

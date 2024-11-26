@@ -2,8 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Optional
 import numpy as np
 from unittest.mock import MagicMock
-from PIL import Image
-import numpy as np
 try:
     from libcamera import controls
     from picamera2 import Picamera2

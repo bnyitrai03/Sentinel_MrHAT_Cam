@@ -1,5 +1,3 @@
-# log_receiver.py
-
 from paho.mqtt import client as mqtt_client
 import logging
 import sys

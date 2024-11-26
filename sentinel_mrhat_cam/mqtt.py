@@ -12,7 +12,10 @@ try:
 except ImportError:
     mqtt_client = None  # type: ignore
     mqtt_enums = None  # type: ignore
-from .static_config import BROKER, CONFIGSUB_TOPIC, PORT, QOS, TEMP_CONFIG_PATH, CONFIG_PATH, USERNAME, PASSWORD, CONFIGACK_TOPIC, MAX_WAIT_TIME_FOR_CONFG
+from .static_config import (
+    BROKER, CONFIGSUB_TOPIC, PORT, QOS, TEMP_CONFIG_PATH, CONFIG_PATH,
+    USERNAME, PASSWORD, CONFIGACK_TOPIC, MAX_WAIT_TIME_FOR_CONFG
+)
 
 
 class ICommunication(ABC):
@@ -23,7 +26,7 @@ class ICommunication(ABC):
     @abstractmethod
     def disconnect(self) -> None:
         pass
-    
+
     @abstractmethod
     def send(self, message: str, topic: str) -> None:
         pass
@@ -33,13 +36,12 @@ class ICommunication(ABC):
         pass
 
     @abstractmethod
-    def clear_config_received(self)-> None:
+    def clear_config_received(self) -> None:
         pass
 
     @abstractmethod
     def wait_for_config(self) -> bool:
         pass
-
 
 
 class MQTT(ICommunication):
@@ -304,7 +306,7 @@ class MQTT(ICommunication):
             self.client.loop_stop()
             self.client.disconnect()
 
-    def clear_config_received(self)-> None:
+    def clear_config_received(self) -> None:
         self.config_received_event.clear()
 
     def wait_for_config(self) -> bool:

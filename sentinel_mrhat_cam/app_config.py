@@ -258,14 +258,18 @@ class Config:
             if interval["start"] >= interval["end"]:
                 raise ValueError("Start time must be before end time in each interval.")
 
-        # Check if intervals cover full day without overlap
-        # Sort intervals by start time
+        Config._validate_interval_covarge(timing)
+
+    @staticmethod
+    def _validate_interval_covarge(timing: List[Dict[str, Any]]) -> None:
+        """ Check if intervals cover full day without overlap
+         Sort intervals by start time """
         sorted_intervals = sorted(timing, key=lambda i: i["start"])
 
-        # Iterate through sorted intervals
-        # enumerate is used to get both the index and value in each iteration
-        # This allows us to easily check the first (i == 0) and last (i == len(sorted_intervals) - 1) intervals,
-        # as well as compare each interval with the next one (sorted_intervals[i+1])
+        """  # Iterate through sorted intervals
+         enumerate is used to get both the index and value in each iteration
+         This allows us to easily check the first (i == 0) and last (i == len(sorted_intervals) - 1) intervals,
+         as well as compare each interval with the next one (sorted_intervals[i+1]) """
         for i, interval in enumerate(sorted_intervals):
             if i == 0 and interval["start"] != "00:00:00":
                 raise ValueError("First interval must start at 00:00:00")
@@ -275,7 +279,7 @@ class Config:
 
             # Check if current interval ends where next interval starts
             if i < len(sorted_intervals) - 1:
-                if interval["end"] != sorted_intervals[i+1]["start"]:
+                if interval["end"] != sorted_intervals[i + 1]["start"]:
                     raise ValueError("Intervals must be contiguous")
 
     @staticmethod

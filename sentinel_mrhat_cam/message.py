@@ -1,7 +1,6 @@
 from .system import ISystem
 from .rtc import IRTC
 from .camera import ICamera
-import numpy as np
 from PIL import Image
 from unittest.mock import MagicMock
 import io
