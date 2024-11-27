@@ -2,15 +2,13 @@
 <br>
 Welcome to the documentation. 🐦
 
-[Project Homepage](https://github.com/Aitia-IIOT/sentinel-mrhat-cam)
+[Project Homepage](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam)
 
-[![website](https://github.com/leventenyiri/AitiA/actions/workflows/documentation-release.yml/badge.svg)](https://github.com/leventenyiri/AitiA/actions/workflows/documentation-release.yml)
+[![Documentation](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/documentation.yaml/badge.svg)](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/documentation.yaml)
 
-[![Python release](https://github.com/Aitia-IIOT/sentinel-mrhat-cam/actions/workflows/python-release.yml/badge.svg)](https://github.com/Aitia-IIOT/sentinel-mrhat-cam/actions/workflows/python-release.yml)
+[![Test](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/test.yaml/badge.svg)](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/test.yaml)
 
-[![Python test](https://github.com/leventenyiri/AitiA/actions/workflows/python-test.yml/badge.svg)](https://github.com/leventenyiri/AitiA/actions/workflows/python-test.yml)
-
-[![Coverage badge](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=coverage&query=%24.message&url=https%3A%2F%2Fraw.githubusercontent.com%2Fleventenyiri%2FAitiA%2Fpython-coverage-comment-action-data%2Fendpoint.json)](https://htmlpreview.github.io/?https://github.com/leventenyiri/AitiA/blob/python-coverage-comment-action-data/htmlcov/index.html)
+[![Coverage badge](https://raw.githubusercontent.com/bnyitrai03/Sentinel_MrHAT_Cam/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
 <br><br>
 
