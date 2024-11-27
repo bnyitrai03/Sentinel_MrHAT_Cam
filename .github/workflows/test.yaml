@@ -23,7 +23,8 @@ jobs:
           pip install flake8
           flake8
       - name: Run tests with pytest
-        run: pip install pytest coverage
+        run: |
+             pip install pytest coverage
              coverage run -m pytest
       - name: Generate coverage report
         run: |
