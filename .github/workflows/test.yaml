@@ -22,3 +22,15 @@ jobs:
         run: |
           pip install flake8
           flake8
+      - name: Run tests with pytest
+        run: pip install pytest coverage
+             coverage run -m pytest
+      - name: Generate coverage report
+        run: |
+          coverage report
+          coverage html
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: htmlcov
