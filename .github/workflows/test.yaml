@@ -28,3 +28,14 @@ jobs:
              coverage run -m pytest
       - name: Generate coverage report
         run: coverage report
+      - name: Upload coverage to Codecov
+        run: |
+          pip install codecov
+          codecov
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
