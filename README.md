@@ -1,7 +1,9 @@
 # Sentinel_MrHAT_Cam
 
-[![Documentation](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/documentation_release.yaml/badge.svg)](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/documentation_release.yaml)
+Documentation page: https://bnyitrai03.github.io/Sentinel_MrHAT_Cam/sentinel_mrhat_cam.html
 
-[![Tests](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/test.yaml/badge.svg)](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/test.yaml)
+[![Documentation](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/documentation.yaml/badge.svg)](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/documentation.yaml)
 
-[![codecov](https://codecov.io/github/bnyitrai03/Sentinel_MrHAT_Cam/graph/badge.svg?token=DWGYCISE2Z)](https://codecov.io/github/bnyitrai03/Sentinel_MrHAT_Cam)
+[![Test](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/test.yaml/badge.svg)](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/test.yaml)
+
+[![Coverage badge](https://raw.githubusercontent.com/bnyitrai03/Sentinel_MrHAT_Cam/python-coverage-comment-action-data/badge.svg)](https://htmlpreview.github.io/?https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/blob/python-coverage-comment-action-data/htmlcov/index.html)
