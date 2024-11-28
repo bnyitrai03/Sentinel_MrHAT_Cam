@@ -3,6 +3,9 @@ name: Test
 on:
     push:
       branches: main
+      tags-ignore: 'v*.*.*'  # Exclude version tags to prevent duplicate test runs
+
+    workflow_call:
 
 jobs:
   test:

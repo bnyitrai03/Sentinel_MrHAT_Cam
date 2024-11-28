@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    tags: v*.*.*
+
+jobs:
+  test:
+    name: Build and test
+    uses: ./.github/workflows/test.yaml
+
+  release:
+    needs: test
+    name: Publish and release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Package and publish
+        uses: EffectiveRange/python-package-github-action@v2
+        with:
+          use-devcontainer: 'true'
+          container-config: 'amd64-container'
+          debian-dist-command: 'sudo apt-get install -y libcap-dev && pack_python . --all'
+          install-packaging-tools: 'false'
+          add-wheel-dist: 'false'
+      - name: Release
+        uses: EffectiveRange/version-release-github-action@v1
