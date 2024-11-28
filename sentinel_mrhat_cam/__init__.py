@@ -19,17 +19,13 @@ The device consists of a Raspberry Pi Zero 2W,  MrHat by [Effective-Range™](ht
 Its function is taking pictures periodically and sending them through MQTT. The period, mode and working time is configurable by sending a config file to the device.
 
 #### Period
-How often the images will be taken.
+How often the images will be transported from the camera device to the MQTT subscriber.
 
-#### Mode
-Either **one-shot** (take one picture, send it, then shut down), **always-on** (taking and sending them as fast as it can without break), and **periodic** (taking and sending pictures with a given period).
-In production only the **periodic** mode will be used.
+About how to send the config, see the [Messaging](https://leventenyiri.github.io/AitiA/sentinel_mrhat_cam.html#messaging) section.
 
-About where to send the config, see the [Messaging](https://leventenyiri.github.io/AitiA/sentinel_mrhat_cam.html#messaging) section.
+The product comes in a water and dust-proof case with wifi antenna and IP68 rated button.
 
-The end product will come in a water and dust-proof case with wifi antenna and IP68 rated button, currently the prototype is in an electrical box, originally rated IP68, but a hole had to be drilled for the USB cable, so using duct tape around the area is recommended if you plan on using it in the rain.
-
-![Hole in case](https://github.com/bnyitrai03/rpizero_storage/blob/main/HoleInBox.jpg?raw=true)
+![Camera Device](https://github.com/bnyitrai03/rpizero_storage/blob/main/image.png?raw=true)
 
 <br><br><br><br>
 
