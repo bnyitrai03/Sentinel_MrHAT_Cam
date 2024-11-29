@@ -25,7 +25,7 @@ jobs:
         uses: EffectiveRange/python-package-github-action@v2
         with:
           use-devcontainer: 'true'
-          container-config: 'amd64-container'
+          container-config: 'armhf-container'
           debian-dist-command: 'sudo apt-get install -y libcap-dev && pack_python . --all'
           install-packaging-tools: 'false'
           add-wheel-dist: 'false'
