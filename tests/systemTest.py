@@ -52,14 +52,14 @@ def test_schedule_wakeup_logging():
          patch('logging.error') as mock_log_error:
 
         mock_error = subprocess.CalledProcessError(
-            returncode=1, 
-            cmd="sudo mrhat-rtcwake", 
+            returncode=1,
+            cmd="sudo mrhat-rtcwake",
             stderr="Detailed error message"
         )
         mock_run.side_effect = mock_error
         with pytest.raises(SystemExit):
             test.schedule_wakeup(3600)
-        
+
         assert mock_log_error.call_count == 2
         first_call = mock_log_error.call_args_list[0][0][0]
         assert "Failed to set RTC wake-up alarm" in first_call
@@ -139,7 +139,7 @@ def test_get_hardware_info_successful_retrieval():
     with patch.object(System, '_get_battery_info', return_value=mock_battery_data), \
          patch.object(System, '_get_charger_info', return_value=mock_charger_data), \
          patch.object(System, '_get_cpu_temperature', return_value=mock_cpu_temp):
-        
+
         result = test.get_hardware_info()
         assert result is not None
         assert 'timestamp' in result
@@ -164,7 +164,7 @@ def test_get_hardware_info_partial_data():
     with patch.object(System, '_get_battery_info', return_value=mock_battery_data), \
          patch.object(System, '_get_charger_info', return_value=mock_charger_data), \
          patch.object(System, '_get_cpu_temperature', return_value=mock_cpu_temp):
-        
+
         result = test.get_hardware_info()
         assert result is not None
         assert result['battery_temperature'] == 0
