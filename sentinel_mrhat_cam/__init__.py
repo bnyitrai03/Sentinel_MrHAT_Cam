@@ -5,26 +5,20 @@ Welcome to the documentation. 🐦
 [Project Homepage](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam)
 
 [![Documentation](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/documentation.yaml/badge.svg)](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/documentation.yaml)
-
 [![Release](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/release.yaml/badge.svg)](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/release.yaml)
-
 [![Test](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/test.yaml/badge.svg)](https://github.com/bnyitrai03/Sentinel_MrHAT_Cam/actions/workflows/test.yaml)
-
 [![codecov](https://codecov.io/gh/bnyitrai03/Sentinel_MrHAT_Cam/branch/main/graph/badge.svg)](https://codecov.io/gh/bnyitrai03/Sentinel_MrHAT_Cam)
 <br><br>
 
 ## Overview
 
-The device consists of a Raspberry Pi Zero 2W,  MrHat by [Effective-Range™](https://effective-range.com), a camera📸, a battery🔋 and a solar panel☀️.
-Its function is taking pictures periodically and sending them through MQTT. The period, mode and working time is configurable by sending a config file to the device.
-
-#### Period
-How often the images will be transported from the camera device to the MQTT subscriber.
+The main components of the device are a Raspberry Pi Zero 2W, a MrHat by [Effective-Range™](https://effective-range.com), a camera📸, a battery🔋 and a solar panel☀️.
+Its function is taking pictures periodically and sending them through MQTT. The period and working time is configurable by sending a config JSON file to the device.
 
 About how to send the config, see the [Messaging](https://leventenyiri.github.io/AitiA/sentinel_mrhat_cam.html#messaging) section.
 
-The product comes in a water and dust-proof case with wifi antenna and IP68 rated button.
-
+#### Device
+The camera device comes in a rain- and dust-proof case with wifi antenna and IP68 rated button.
 ![Camera Device](https://github.com/bnyitrai03/rpizero_storage/blob/main/image.png?raw=true)
 
 <br><br><br><br>

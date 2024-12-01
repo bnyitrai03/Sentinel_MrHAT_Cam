@@ -1,0 +1,18 @@
+battery_temperature=35.5, battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_temperature=35.5, battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_temperature=35.5, battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_temperature=35.5, battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_temperature=35.5, battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_temperature=35.5, battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_temperature=35.5, battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_temperature=35.5, battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_temperature=35.5, battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
+battery_percentage=85, cpu_temperature=65.2, battery_voltage_now=4.2, battery_voltage_avg=4.1, battery_current_now=500, battery_current_avg=450, charger_voltage_now=5.0, charger_current_now=1000
