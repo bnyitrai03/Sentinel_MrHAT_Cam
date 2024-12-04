@@ -114,10 +114,10 @@ class Config:
 
         except json.JSONDecodeError as e:
             logging.error(f"Invalid JSON in the config file: {str(e)}")
-            raise
+            raise json.JSONDecodeError
         except FileNotFoundError as e:
             logging.error(f"Config file not found: {self._path} - {str(e)}")
-            raise
+            raise FileNotFoundError
         except Exception as e:
             logging.error(e)
             raise
