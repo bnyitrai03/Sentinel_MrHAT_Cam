@@ -13,13 +13,11 @@ class CameraTest:
         camera = Camera({"quality": "invalid"})
         return camera
 
-
     def test_invalid_camera_start(self, camera):
         camera.start()
         camera._cam.create_still_configuration.assert_called_once_with({"size": (2560, 1440)})
         camera._cam.configure.assert_called_once()
         camera._cam.start.assert_called_once_with(show_preview=False)
-
 
     def test_camera_capture_success(self, camera):
         mock_image = np.random.randint(0, 255, (2560, 1440, 3), dtype=np.uint8)
