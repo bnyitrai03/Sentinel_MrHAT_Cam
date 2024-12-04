@@ -59,7 +59,7 @@ class Logger(logging.Handler):
                     self._remote.send(msg, topic)
                 else:
                     return
-            except Empty or TimeoutError:
+            except (Empty, TimeoutError):
                 return
             except Exception as e:
                 print(f"Error in Logger publish loop: {e}")
