@@ -43,9 +43,6 @@ class Camera(ICamera):
             logging.error(f"Invalid quality specified: {self._config['quality']}. Defaulting to 3K quality.")
         logging.info("Camera instance created")
 
-        # Test logging
-        logging.info(f"Config quality: {self._config['quality']}")
-
     def start(self) -> None:
         """
         Configures and starts the camera with the settings from the config file.
