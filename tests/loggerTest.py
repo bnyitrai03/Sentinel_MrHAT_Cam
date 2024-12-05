@@ -1,7 +1,9 @@
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch, MagicMock, mock_open
 from sentinel_mrhat_cam import Logger
 import logging
+import yaml
+import logging.config
 import threading
 from queue import Queue
 
@@ -29,7 +31,7 @@ class LoggerTest:
         return record
 
     @pytest.fixture
-    def mock_yaml_config(self):
+    def valid_yaml_config(self):
         return {
             'version': 1,
             'formatters': {
@@ -134,3 +136,28 @@ class LoggerTest:
             formatted_msg = list(logger._log_queue.queue)[0]
             assert f"Test log at {logging.getLevelName(level)} level" in formatted_msg
             assert logging.getLevelName(level) in formatted_msg
+
+    def test_start_logging_file_not_exists(self, logger):
+        with patch('os.path.exists', return_value=False):
+            with pytest.raises(SystemExit):
+                with patch('builtins.exit', side_effect=SystemExit):
+                    logger.start_logging()
+
+    def test_start_logging_successful_configuration(self, logger, valid_yaml_config):
+        with patch('os.path.exists', return_value=True), \
+             patch('builtins.open', mock_open(read_data=yaml.dump(valid_yaml_config))), \
+             patch('logging.config.dictConfig') as mock_dict_config, \
+             patch('logging.getLogger') as mock_get_logger, \
+             patch('logging.info') as mock_log_info:
+            logger.start_logging()
+            mock_dict_config.assert_called_once_with(valid_yaml_config)
+            mock_get_logger().addHandler.assert_called_once_with(logger)
+            mock_log_info.assert_called_once_with("Logging started")
+
+    def test_start_logging_yaml_parse_error(self, logger):
+        with patch('os.path.exists', return_value=True), \
+             patch('builtins.open', mock_open(read_data="invalid: yaml: config")), \
+             patch('yaml.safe_load', side_effect=yaml.YAMLError("Parsing error")):
+            with pytest.raises(SystemExit):
+                with patch('builtins.exit', side_effect=SystemExit):
+                    logger.start_logging()
