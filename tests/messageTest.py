@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 import base64
 import logging
+import json
 from typing import Dict, Any
 from unittest.mock import mock_open, patch, MagicMock, Mock
 from sentinel_mrhat_cam import MessageCreator
@@ -61,7 +62,6 @@ def message_creator(mock_system, mock_rtc, mock_image):
     return message_creator
 
 
-# Megy szakdogába :D
 def test_create_base64_image_succes():
     test_instance = MessageCreator(camera=MagicMock(), rtc=MagicMock(), system=MagicMock())
     test_image_array = np.full((100, 100, 3), 128, dtype=np.uint8)
@@ -122,3 +122,50 @@ def test_log_hardware_info_missing_key(sample_hardware_info):
 
 def test_create_message_success(message_creator):
     message_creator.create_message()
+
+
+def test_create_message_complete_flow(mock_system, mock_rtc):
+    mock_camera = MagicMock()
+    mock_camera.capture.return_value = np.full((100, 100, 3), 128, dtype=np.uint8)
+    mock_system.get_hardware_info.return_value = {
+        "cpu_temperature": 45.5,
+        "battery_temperature": 30.2,
+        "battery_percentage": 85,
+        "battery_voltage_now": 4.2,
+        "battery_voltage_avg": 4.1,
+        "battery_current_now": 500,
+        "battery_current_avg": 450,
+        "charger_voltage_now": 5.0,
+        "charger_current_now": 1000
+    }
+    message_creator = MessageCreator(camera=mock_camera, rtc=mock_rtc, system=mock_system)
+    message_str = message_creator.create_message()
+    message_dict = json.loads(message_str)
+    assert 'timestamp' in message_dict
+    assert 'image' in message_dict
+    assert 'cpuTemp' in message_dict
+    assert 'batteryTemp' in message_dict
+    assert 'batteryCharge' in message_dict
+    assert message_dict['timestamp'] == "2024-01-15T12:30:45Z"
+    assert message_dict['cpuTemp'] == 45.5
+    assert message_dict['batteryTemp'] == 30.2
+    assert message_dict['batteryCharge'] == 85
+
+
+@pytest.mark.parametrize("missing_key", [
+    'battery_temperature',
+    'battery_percentage',
+    'cpu_temperature',
+    'battery_voltage_now',
+    'battery_voltage_avg',
+    'battery_current_now',
+    'battery_current_avg',
+    'charger_voltage_now',
+    'charger_current_now'
+])
+def test_log_hardware_info_missing_keys(sample_hardware_info, missing_key):
+    test_instance = MessageCreator(camera=MagicMock(), rtc=MagicMock(), system=MagicMock())
+    incomplete_hardware_info = sample_hardware_info.copy()
+    del incomplete_hardware_info[missing_key]
+    with pytest.raises(KeyError, match=missing_key):
+        test_instance._log_hardware_info(incomplete_hardware_info)

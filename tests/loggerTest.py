@@ -2,6 +2,8 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 from sentinel_mrhat_cam import Logger
 import logging
+import threading
+from queue import Queue
 
 
 class LoggerTest:
@@ -99,3 +101,36 @@ class LoggerTest:
     def test_stop_remote_logging(self, logger):
         logger.stop_remote_logging()
         assert logger._start_event.is_set() is False
+
+    def test_logger_initialization(self, logger):
+        """Test logger initialization attributes."""
+        assert isinstance(logger._log_queue, Queue)
+        assert isinstance(logger._start_event, threading.Event)
+        assert logger.level == logging.INFO
+        assert logger.formatter is not None
+
+    def test_emit_with_different_log_levels(self, logger):
+        """Test emit method with different log record levels."""
+        test_levels = [
+            logging.DEBUG,
+            logging.INFO,
+            logging.WARNING,
+            logging.ERROR,
+            logging.CRITICAL
+        ]
+        for level in test_levels:
+            record = logging.LogRecord(
+                name='test',
+                level=level,
+                pathname='test.py',
+                lineno=1,
+                msg=f"Test log at {logging.getLevelName(level)} level",
+                args=(),
+                exc_info=None
+            )
+            logger._log_queue.queue.clear()
+            logger.emit(record)
+            assert not logger._log_queue.empty()
+            formatted_msg = list(logger._log_queue.queue)[0]
+            assert f"Test log at {logging.getLevelName(level)} level" in formatted_msg
+            assert logging.getLevelName(level) in formatted_msg
