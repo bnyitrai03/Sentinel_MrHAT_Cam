@@ -105,3 +105,29 @@ class MQTTTest:
         result = mock_mqtt.wait_for_config()
         assert result
         assert "Config received" in caplog.text
+
+    def test_paho_mqtt_import_success(self):
+        with patch.dict("sys.modules", {
+            "paho.mqtt": MagicMock(),
+            "paho.mqtt.client": MagicMock(),
+            "paho.mqtt.enums": MagicMock(),
+        }):
+            # Reload the module to simulate the import process
+            import sentinel_mrhat_cam  # Replace with your module's name
+            assert sentinel_mrhat_cam.mqtt_client is not None
+            assert sentinel_mrhat_cam.mqtt_enums is not None
+
+    def test_clear_config_received(self, mock_mqtt):
+        mock_mqtt.config_received_event.set()
+        mock_mqtt.clear_config_received()
+        assert mock_mqtt.config_received_event.is_set() is False
+
+    def test_send_publish_failure(self, mock_mqtt):
+        mock_mqtt.client.publish.side_effect = Exception("Mocked publish failure")
+        with pytest.raises(SystemExit):
+            mock_mqtt.send("Test message", "test/topic")
+
+    def test_connect_failure(self, mock_mqtt):
+        mock_mqtt.client.connect.side_effect = Exception("Mocked publish failure")
+        with pytest.raises(SystemExit):
+            mock_mqtt.connect()
