@@ -182,9 +182,6 @@ class MQTT(ICommunication):
 
         def on_message(client: Any, userdata: Any, message: Any) -> None:
             from .app_config import Config
-
-            print("\n Inside on_message \n")
-
             try:
 
                 print(f"\nReceived message: {message.payload.decode()}")
@@ -219,7 +216,7 @@ class MQTT(ICommunication):
 
         self.client.on_message = on_message
         self.client.subscribe(self._subtopic)
-        print(f"Subscribed to topic: {self._subtopic}")
+        logging.info(f"Subscribed to topic: {self._subtopic}")
 
     def is_connected(self) -> bool:
         return self.client.is_connected()
